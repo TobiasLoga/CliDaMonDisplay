@@ -1,0 +1,12 @@
+name: CliDaMonDisplay
+title: CliDaMonDisplay
+username: tobilo
+account: tobilo
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 11183278
+bundleId: 8239414
+url: https://tobilo.shinyapps.io/CliDaMonDisplay/
+version: 1
+asMultiple: FALSE
+asStatic: FALSE
