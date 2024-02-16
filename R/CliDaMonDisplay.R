@@ -3,6 +3,8 @@ devtools::install_github ("TobiasLoga/CliDaMon")
 devtools::install_github ("TobiasLoga/AuxFunctions")
 
 library (shiny)
+library (shinydashboard)
+
 library (clidamonger)
 library (CliDaMon)
 library (AuxFunctions)
@@ -80,6 +82,21 @@ Format_DataFrameForOutput <- function (
 #   myDigits = c (NA, NA, NA, 2, 4, NA, 3, NA, 4, 4, 4, 5, 2),
 #   myColNames = c ("ID", "OrNaem", "OrCode", "OrDegr", "InclDegr", "Study", NA, NA, NA, NA, NA, NA, NA)
 # )
+
+
+RemoveStringFromDFColNames <- function (
+    myDataFrame,
+    myStringToRemove = ""
+) {
+  colnames (myDataFrame) <- 
+    gsub (
+      pattern = myStringToRemove, 
+      replacement = "",
+      x = colnames (myDataFrame)
+    )
+  return (myDataFrame)
+}
+
 
 
 CalculateClimate <- function (
@@ -195,59 +212,131 @@ CalculateClimate <- function (
 ## User Interface -----
 
 
-ui <- fluidPage (
-
+ui <- dashboardPage (
   
-  titlePanel (
-    title = strong ("IWU - Gradtagzahlen Deutschland - Shiny App"),
-    windowTitle = "IWU - Gradtagzahlen Deutschland - Shiny App"
-    ),
-
+  dashboardHeader (
+    title = "IWU - Gradtagzahlen"
+  ),
   
-  ### sidebarLayout START -----
-
-  sidebarLayout ( 
+  dashboardSidebar ( 
     
-    sidebarPanel (
+    minified = FALSE, 
+    collapsed = FALSE, 
+    
+    sidebarMenu (
+      menuItem (
+        "Info",      
+        tabName = "Tab_Info",      
+        icon = icon ("info-circle")
+        ),
+      menuItem (
+        "Dashboard", 
+        tabName = "Tab_Dashboard", 
+        icon = icon ("fa-solid fa-chart-line"),
+#        icon = icon ("dashboard"),
+        selected = TRUE
+        ),
+      menuItem (
+        "Daten",     
+        tabName = "Tab_Data",          
+        icon = icon ("table")
+        )
+    ) # End side barMenu
+    
+  ), # End dashboardSidebar 
+  
+  #_ -----
+  
+  
+  #######################################################################X
+  ## Dashboard Body -----
+  
+  dashboardBody (
+    
+    tabItems (
       
-      fluidRow (
-#        mainPanel (
-          
-
-        column (
-          12, 
-          #style = "height:600px", 
-          # # geht im Prinzip, aber optimale Höhe hängt von Fenstergröße ab
-          #style = "height:800px;background-color: yellow",
+      
+      #######################################################################X
+      ## tabItem "Tab_Info"  -----
+      
+      tabItem (
         
+        tabName = "Tab_Info",
+        
+        h2 ("Information")
+        
+        
+        # source ($$)
+        
+        
+      ), # End tabItem "Tab_Info"
+      
+      
+      
+      
+      #######################################################################X
+      ## tabItem "Tab_Dashboard"  -----
+      
+      tabItem (
+        
+        tabName = "Tab_Dashboard",
+        
+        h2 ("IWU - Gradtagzahlen Deutschland - Shiny App"),
+        
+        
+        fluidPage (
           
-          tabsetPanel (
-            type = "tabs",
-              
-            #######################################################################X
-            #### [ tabPanel "Eingaben" START -----
+          
+            # titlePanel (
+            #   title = strong ("IWU - Gradtagzahlen Deutschland - Shiny App"),
+            #   windowTitle = "IWU - Gradtagzahlen Deutschland - Shiny App"
+            # ),
+          
+          
+          ### sidebarLayout START -----
+          
+          sidebarLayout ( 
             
-            tabPanel (
-              "Eingaben", 
-            
-                          #strong ("Eingaben"), " ",
-                
-              br (),
-
-              #######################################################################X
-              #### Eingaben "Klima 1" ----- 
+            sidebarPanel (
               
               fluidRow (
-                strong ("Klima 1")
-                ),
-
-              br (),
+                #        mainPanel (
                 
-
-              conditionalPanel (
                 
-                condition = 
-                "(input.Code_Type_LocationBuilding_1 == 'Postcode_1Station') | 
+                column (
+                  12, 
+                  #style = "height:600px", 
+                  # # geht im Prinzip, aber optimale Höhe hängt von Fenstergröße ab
+                  #style = "height:800px;background-color: yellow",
+                  
+                  
+                  tabsetPanel (
+                    type = "tabs",
+                    
+                    #######################################################################X
+                    #### [ tabPanel "Eingaben" START -----
+                    
+                    tabPanel (
+                      "Eingaben", 
+                      
+                      #strong ("Eingaben"), " ",
+                      
+                      br (),
+                      
+                      #######################################################################X
+                      #### Eingaben "Klima 1" ----- 
+                      
+                      fluidRow (
+                        strong ("Klima 1")
+                      ),
+                      
+                      br (),
+                      
+                      
+                      conditionalPanel (
+                        
+                        condition = 
+                          "(input.Code_Type_LocationBuilding_1 == 'Postcode_1Station') | 
                 (input.Code_Type_LocationBuilding_1 == 'Postcode_3Stations')",
                 
                 
@@ -256,7 +345,7 @@ ui <- fluidPage (
                   column (
                     7,
                     "Postleitzahl"
-                    ),
+                  ),
                   
                   column (
                     5,
@@ -268,82 +357,82 @@ ui <- fluidPage (
                       min = 0,
                       max = 99999,
                       width = 100
-                      ),
-                    style = "height:35px"
                     ),
-                  
-                  style = "border: 1px dotted lightgrey"
-
-                  ), # End fluidRow
-                
-
-                ), # End conditionalPanel
-              
-              
-              conditionalPanel (
-                
-                condition = 
-                  "(input.Code_Type_LocationBuilding_1 == 'ID_Station')",
-                
-                fluidRow (
-                  column (
-                    7,
-                    "Klimastation (Nr.)",
+                    style = "height:35px"
                   ),
-                  
-                  column (
-                    5,
-                    #"Klimastation (Nr.)",
-                    numericInput (
-                      inputId = "Code_ClimateStation_1",
-                      label = NULL,
-                      #label = "Klimastation (Nr.)",
-                      value = 917,
-                      min = 1,
-                      max = 99999,
-                      width = 100
-                      ),
-                    style = "height:35px"
-                    ),
                   
                   style = "border: 1px dotted lightgrey"
                   
                 ), # End fluidRow
                 
                 
-              ), # End conditionalPanel
+                      ), # End conditionalPanel
                 
-
-              fluidRow (
                 
-                column (
-                  7,
-                  "Jahr",
+                conditionalPanel (
+                  
+                  condition = 
+                    "(input.Code_Type_LocationBuilding_1 == 'ID_Station')",
+                  
+                  fluidRow (
+                    column (
+                      7,
+                      "Klimastation (Nr.)",
+                    ),
+                    
+                    column (
+                      5,
+                      #"Klimastation (Nr.)",
+                      numericInput (
+                        inputId = "Code_ClimateStation_1",
+                        label = NULL,
+                        #label = "Klimastation (Nr.)",
+                        value = 917,
+                        min = 1,
+                        max = 99999,
+                        width = 100
+                      ),
+                      style = "height:35px"
+                    ),
+                    
+                    style = "border: 1px dotted lightgrey"
+                    
+                  ), # End fluidRow
+                  
+                  
+                ), # End conditionalPanel
+                
+                
+                fluidRow (
+                  
+                  column (
+                    7,
+                    "Jahr",
                   ),
-                
-                column (
-                  5,
-                  selectInput (
-                    inputId = "Year_End_1",
-                    label = NULL,
-                    #label   = "Jahr",
-                    choices = c (1995:2023),
-                    selected = 2021,
-                    width = 100
+                  
+                  column (
+                    5,
+                    selectInput (
+                      inputId = "Year_End_1",
+                      label = NULL,
+                      #label   = "Jahr",
+                      choices = c (1995:2023),
+                      selected = 2021,
+                      width = 100
                     ),
                     style = "height:35px"
                   ),
-                
-                style = "border: 1px dotted lightgrey"
-                #style = "border: 1px solid lightgrey"
-                #style = "background-color: yellow",
-                #style = "height:30px;background-color: white",
-                
+                  
+                  style = "border: 1px dotted lightgrey"
+                  #style = "border: 1px solid lightgrey"
+                  #style = "background-color: yellow",
+                  #style = "height:30px;background-color: white",
+                  
                 ),
-
-
+                
+                
                 fluidRow (
-
+                  
                   column (
                     7,
                     "letzter Monat"
@@ -366,7 +455,7 @@ ui <- fluidPage (
                   
                 ),   # End fluidRow
                 
-              
+                
                 fluidRow (
                   
                   column (
@@ -391,14 +480,14 @@ ui <- fluidPage (
                   
                 ),   # End fluidRow
                 
-                  
+                
                 fluidRow (
                   
                   column (
                     7,
                     "Heizgrenz-Temperatur [°C]"
-                    ),
-
+                  ),
+                  
                   column (
                     5,
                     selectInput (
@@ -407,15 +496,15 @@ ui <- fluidPage (
                       choices = c (10, 12, 15),
                       selected = 12,
                       width = 100
-                      ),
-                    style = "height:35px"
                     ),
+                    style = "height:35px"
+                  ),
                   
                   style = "border: 1px dotted lightgrey"
-                
-                  ),   # End fluidRow
-                
                   
+                ),   # End fluidRow
+                
+                
                 conditionalPanel (
                   
                   condition = 
@@ -426,7 +515,7 @@ ui <- fluidPage (
                     column (
                       7,
                       "Raum-Temperatur [°C]"
-                      ),
+                    ),
                     
                     column (
                       5,
@@ -437,597 +526,696 @@ ui <- fluidPage (
                         min = 15,
                         max = 25,
                         width = 100
-                        ),
-                      style = "height:35px"
                       ),
-
+                      style = "height:35px"
+                    ),
+                    
                     
                     style = "border: 1px dotted lightgrey"
                     
-                    ) # END fluidRow
+                  ) # END fluidRow
                   
-                  ), # END conditionalPanel
-
-              br (),
-              
-
-              #######################################################################X
-              #### Eingaben "Klima 2" ----- 
-              
-              fluidRow (strong ("Klima 2")),
-              
-              br (),
-              
-              conditionalPanel (
+                ), # END conditionalPanel
                 
-                condition =  
-                  "((input.Code_Type_LocationBuilding_2 == 'Postcode_1Station') | 
+                br (),
+                
+                
+                #######################################################################X
+                #### Eingaben "Klima 2" ----- 
+                
+                fluidRow (strong ("Klima 2")),
+                
+                br (),
+                
+                conditionalPanel (
+                  
+                  condition =  
+                    "((input.Code_Type_LocationBuilding_2 == 'Postcode_1Station') | 
                    (input.Code_Type_LocationBuilding_2 == 'Postcode_3Stations')) &
                    (input.ShowInput_Location_2 |
                     input.Code_Type_LocationBuilding_1 == 'ID_Station')",
-                
-                fluidRow (
                   
-                  column (
-                    7,
-                    "Postleitzahl"
+                  fluidRow (
+                    
+                    column (
+                      7,
+                      "Postleitzahl"
                     ),
-                  
-                  column (
-                    5,
-                    numericInput (
-                      inputId = "PostCode_2",
-                      label = NULL,
-                      # label = "Postleitzahl",
-                      value = 13469,
-                      min = 0,
-                      max = 99999,
-                      width = 100
+                    
+                    column (
+                      5,
+                      numericInput (
+                        inputId = "PostCode_2",
+                        label = NULL,
+                        # label = "Postleitzahl",
+                        value = 13469,
+                        min = 0,
+                        max = 99999,
+                        width = 100
                       ),
-                    style = "height:35px"
+                      style = "height:35px"
                     ),
-                  
-                  style = "border: 1px dotted lightgrey"
-                  
+                    
+                    style = "border: 1px dotted lightgrey"
+                    
                   ), # End fluidRow
-
+                  
                 ), # End conditionalPanel()
-              
-              
-              conditionalPanel (
                 
-                condition = 
-                  "(input.Code_Type_LocationBuilding_2 == 'ID_Station') &
+                
+                conditionalPanel (
+                  
+                  condition = 
+                    "(input.Code_Type_LocationBuilding_2 == 'ID_Station') &
                    (input.ShowInput_Location_2 |
                     input.Code_Type_LocationBuilding_1 != 'ID_Station')",
-                
-                fluidRow (
                   
-                  column (
-                    7,
-                    "Klimastation (Nr.)"
-                  ),
-                  
-                  column (
-                    5,
-                    numericInput (
-                      inputId = "Code_ClimateStation_2",
-                      label = NULL,
-                      # label = "Klimastation (Nr.)",
-                      value = 917,
-                      min = 1,
-                      max = 99999,
-                      width = 100
-                      ),
-                    style = "height:35px"
+                  fluidRow (
+                    
+                    column (
+                      7,
+                      "Klimastation (Nr.)"
                     ),
-                  
+                    
+                    column (
+                      5,
+                      numericInput (
+                        inputId = "Code_ClimateStation_2",
+                        label = NULL,
+                        # label = "Klimastation (Nr.)",
+                        value = 917,
+                        min = 1,
+                        max = 99999,
+                        width = 100
+                      ),
+                      style = "height:35px"
+                    ),
+                    
                     style = "border: 1px dotted lightgrey"
-                  
+                    
                   ), # End fluidRow
-                
+                  
                 ),  # End conditionalPanel       
-              
-              
-              conditionalPanel (
                 
-                condition =
-                  "input.ShowInput_LastYear_2",
                 
-                fluidRow (
+                conditionalPanel (
                   
-                  column (
-                    7,
-                    "Jahr"
-                  ),
+                  condition =
+                    "input.ShowInput_LastYear_2",
                   
-                  column (
-                    5,
-                    selectInput (
-                      inputId = "Year_End_2",
-                      label = NULL,
-                      # label   = "Jahr",
-                      choices = c (1995:2023),
-                      selected = 2021,
-                      width = 100
-                    ), 
-                    style = "height:35px"
-                  ),
+                  fluidRow (
+                    
+                    column (
+                      7,
+                      "Jahr"
+                    ),
+                    
+                    column (
+                      5,
+                      selectInput (
+                        inputId = "Year_End_2",
+                        label = NULL,
+                        # label   = "Jahr",
+                        choices = c (1995:2023),
+                        selected = 2021,
+                        width = 100
+                      ), 
+                      style = "height:35px"
+                    ),
+                    
+                    style = "border: 1px dotted lightgrey"
+                    
+                  ) # End fluidRow
                   
-                  style = "border: 1px dotted lightgrey"
-                  
-                ) # End fluidRow
+                ), # End conditionalPanel
                 
-              ), # End conditionalPanel
-
-         
-              conditionalPanel (
                 
-                condition = "input.ShowInput_LastMonth_2", 
-                
-                fluidRow (
+                conditionalPanel (
                   
-                  column (
-                    7,
-                    "letzter Monat"
-                  ),
+                  condition = "input.ShowInput_LastMonth_2", 
                   
-                  column (
-                    5,
-                    selectInput (
-                      inputId = "Month_End_2",
-                      label = NULL,
-                      # label   = "letzter Monat",
-                      choices = c (1:12),
-                      selected = 12,
-                      width = 100
-                    ), 
-                    style = "height:35px"
-                  ),
-                  
-                  style = "border: 1px dotted lightgrey"
-                  
+                  fluidRow (
+                    
+                    column (
+                      7,
+                      "letzter Monat"
+                    ),
+                    
+                    column (
+                      5,
+                      selectInput (
+                        inputId = "Month_End_2",
+                        label = NULL,
+                        # label   = "letzter Monat",
+                        choices = c (1:12),
+                        selected = 12,
+                        width = 100
+                      ), 
+                      style = "height:35px"
+                    ),
+                    
+                    style = "border: 1px dotted lightgrey"
+                    
                   ), # End fluidRow
-              
+                  
                 ), # End conditionPanel
+                
+                
+                fluidRow (
+                  
+                  column (
+                    7,
+                    "Anzahl Jahre"
+                  ),
+                  
+                  column (
+                    5,
+                    selectInput (
+                      inputId = "n_Year_2", 
+                      label = NULL,
+                      # label   = "Anzahl Jahre",
+                      choices = c (1:25),
+                      selected = 20,
+                      width = 100
+                    ), 
+                    style = "height:35px"
+                  ),
+                  
+                  style = "border: 1px dotted lightgrey"
+                  
+                ), # End fluidRow
+                
+                
+                conditionalPanel (
+                  
+                  condition = 
+                    "input.ShowInput_BaseTemp_RoomTemp_2",
+                  
+                  fluidRow (
+                    
+                    column (
+                      7,
+                      "Temperatur Heizgrenze [°C]"
+                    ),
+                    
+                    column (
+                      5,
+                      selectInput (
+                        inputId = "Temperature_HDD_Base_2",
+                        label   = NULL,
+                        choices = c (10, 12, 15),
+                        selected = 12,
+                        width = 100
+                      ), 
+                      style = "height:35px"
+                    ),
+                    
+                    style = "border: 1px dotted lightgrey"
+                    
+                  ), # End fluidRow
+                  
+                  
+                ), # END conditionalPanel
+                
+                
+                conditionalPanel (
+                  
+                  condition = 
+                    "(input.Code_Type_DegreeDays == 'RHDD') &
+                   input.ShowInput_BaseTemp_RoomTemp_2",
+                  
+                  fluidRow (
+                    
+                    column (
+                      7,
+                      "Raum-Temperatur [°C]"
+                    ),
+                    
+                    column (
+                      5,
+                      numericInput (
+                        inputId = "Temperature_HDD_Room_2", 
+                        label = NULL,
+                        value = 20,
+                        min = 15,
+                        max = 25,
+                        width = 100
+                      ), 
+                      style = "height:35px"
+                    ),
+                    
+                    style = "border: 1px dotted lightgrey"
+                    
+                  ), # End fluidRow
+                  
+                ), # END conditionalPanel
+                
+                
+                    ), #### ] END tabPanel "Eingaben" ----
+                
+                
+                #######################################################################X
+                #### tabPanel "Einstellungen" START -----
+                
+                
+                tabPanel (
+                  "Einstellungen",
+                  
+                  
+                  fluidRow (
+                    
+                    
+                    br (),
+                    
+                    column (
+                      12,
+                      
+                      radioButtons (
+                        inputId = "Code_Type_DegreeDays",
+                        label = "Art der Gradtage",
+                        c ("Heizgradtage (RHDD)" = "RHDD",
+                           "Gradtagzahl (HDD)" = "HDD"),
+                        selected = "RHDD"
+                      ),
+                      
+                      "Gradtagzahl = aufsummierte Differenzen zwischen Innen- und Außentemperatur)",
+                      br (),
+                      "Heizgradtage = aufsummierte Differenzen zwischen Heizgrenz- und Außentemperatur)"
+                    )
+                  ),
+                  
+                  
+                  br (),
+                  
+                  strong ("Art der Standortwahl"),
+                  
+                  br (),
+                  
+                  fluidRow (
+                    
+                    column (
+                      6,
+                      radioButtons (
+                        inputId = "Code_Type_LocationBuilding_1",
+                        label = "Klima 1",
+                        c ("PLZ / 1 Station"    = "Postcode_1Station",
+                           "PLZ / 3 Stationen"  = "Postcode_3Stations",
+                           "Nummer der Station" = "ID_Station"),
+                        selected = "Postcode_3Stations"
+                      ),
+                      style = "border: 1px dotted lightgrey"
+                    ),
+                    
+                    column (
+                      6,
+                      radioButtons (
+                        inputId = "Code_Type_LocationBuilding_2",
+                        label = "Klima 2",
+                        c ("PLZ / 1 Station"    = "Postcode_1Station",
+                           "PLZ / 3 Stationen"  = "Postcode_3Stations",
+                           "Nummer der Station" = "ID_Station"),
+                        selected = "Postcode_3Stations"
+                      ),
+                      style = "border: 1px dotted lightgrey"
+                    ),
+                    
+                    
+                    column (
+                      12,
+                      
+                      strong ("Solarstrahlung geneigte Fläche"),
+                      
+                      fluidRow (
+                        
+                        column (
+                          7,
+                          "Neigung in Grad"
+                        ),
+                        
+                        column (
+                          5,
+                          selectInput (
+                            inputId = "Degree_Inclination_Solar_1", 
+                            label   = NULL,
+                            choices = c (30, 45, 60),
+                            selected = 45,
+                            width = 100
+                          ), 
+                          style = "height:35px"
+                        ),
+                        
+                        style = "border: 1px dotted lightgrey"
+                        
+                      ), # End fluidRow
+                      
+                      br (),
+                      
+                    ),
+                    
+                    br (),
+                    
+                  ),
+                  
+                  strong ("Diagramme einblenden"),
+                  
+                  fluidRow (
+                    
+                    column (
+                      6,
+                      column (
+                        12,
+                        checkboxInput(
+                          inputId =  "ShowPlot_Temperature_1",
+                          label = "Temperatur 1",
+                          value = TRUE,
+                          width = NULL
+                        ),
+                        style = "height:25px"
+                      ),
+                      column (
+                        12,
+                        checkboxInput (
+                          inputId =  "ShowPlot_Temperature_2",
+                          label = "Temperatur 2",
+                          value = TRUE,
+                          width = NULL
+                        ),  
+                        style = "height:25px"
+                      )
+                    ),
+                    
+                    column (
+                      6,
+                      column (
+                        12,
+                        checkboxInput (
+                          inputId =  "ShowPlot_RHDD_HDD",
+                          label = "Gradtagzahl, Heizgradtage",
+                          value = TRUE,
+                          width = NULL
+                        ),
+                        style = "height:40px"
+                      ),
+                      column (
+                        12,
+                        checkboxInput (
+                          inputId =  "ShowPlot_HD",
+                          label = "Heiztage",
+                          value = TRUE,
+                          width = NULL
+                        ),
+                        style = "height:25px"
+                      )
+                    ),
+                    
+                  ), # End fluidRow
+                  
+                  
+                  
+                  
+                  br (),
+                  
+                  strong ("Klima 2: individuelle Eingafelder einblenden"),
+                  
+                  fluidRow (
+                    column (
+                      12,
+                      checkboxInput (
+                        inputId =  "ShowInput_Location_2",
+                        label = "Postleitzahl / Klimastation",
+                        value = FALSE,
+                        width = NULL
+                      ),
+                      style = "height:25px"
+                    )
+                  ),
+                  
+                  fluidRow (
+                    column (
+                      4,
+                      checkboxInput (
+                        inputId =  "ShowInput_LastYear_2",
+                        label = "Jahr",
+                        value = FALSE,
+                        width = NULL
+                      ),
+                      style = "height:25px"
+                    ),
+                    
+                    column (
+                      8,
+                      checkboxInput (
+                        inputId =  "ShowInput_LastMonth_2",
+                        label = "letzter Monat",
+                        value = FALSE,
+                        width = NULL
+                      ),
+                      style = "height:25px"
+                    )
+                    
+                  ),
+                  
+                  checkboxInput (
+                    inputId =  "ShowInput_BaseTemp_RoomTemp_2",
+                    label = "Heizgrenze / Raumtemperatur",
+                    value = FALSE,
+                    width = NULL
+                  ),
+                  
+                  
+                  
+                  
+                  
+                )             
+                #### END tabPanel "Einstellungen" -----
+                
+                
+                
+                
+                
+                  )
+                
+                )        
+                
+              ),
               
+              br (),
               
               fluidRow (
-                
                 column (
-                  7,
-                  "Anzahl Jahre"
-                  ),
-                
-                column (
-                  5,
-                  selectInput (
-                    inputId = "n_Year_2", 
-                    label = NULL,
-                    # label   = "Anzahl Jahre",
-                    choices = c (1:25),
-                    selected = 20,
-                    width = 100
-                    ), 
-                    style = "height:35px"
-                  ),
-                
-                  style = "border: 1px dotted lightgrey"
-                
-              ), # End fluidRow
+                  4,
+                  strong ("Result"),
+                  tableOutput ("Table_Result_Year"),
+                  #style = "height:800px;background-color: yellow",
+                  
+                ),
+                style = "background-color: white"
+              )
+              
+            ),
+            
+            
+            #### mainPanel START -----
+            
+            
+            mainPanel (
+              
+              strong (""),
               
               
               conditionalPanel (
                 
-                condition = 
-                  "input.ShowInput_BaseTemp_RoomTemp_2",
+                "input.ShowPlot_Temperature_1",
                 
-                fluidRow (
-                  
-                  column (
-                    7,
-                    "Temperatur Heizgrenze [°C]"
-                    ),
-                  
-                  column (
-                    5,
-                    selectInput (
-                      inputId = "Temperature_HDD_Base_2",
-                      label   = NULL,
-                      choices = c (10, 12, 15),
-                      selected = 12,
-                      width = 100
-                      ), 
-                      style = "height:35px"
-                    ),
-                  
-                  style = "border: 1px dotted lightgrey"
-                  
-                  ), # End fluidRow
+                "Außentemperatur Klima 1 (Monatsmittel und Monatsmittel an Heiztagen)",
                 
+                plotOutput (outputId = "TemperaturePlot_1",
+                            height = "200px"),
                 
-                ), # END conditionalPanel
+              ),
+              
+              conditionalPanel (
+                
+                "input.ShowPlot_Temperature_2",
+                
+                "Außentemperatur Klima 2 (Monatsmittel und Monatsmittel an Heiztagen)",
+                
+                plotOutput (outputId = "TemperaturePlot_2",
+                            height = "200px")
+                
+              ),
               
               
               conditionalPanel (
                 
-                condition = 
-                  "(input.Code_Type_DegreeDays == 'RHDD') &
-                   input.ShowInput_BaseTemp_RoomTemp_2",
+                "input.ShowPlot_RHDD_HDD",
                 
-                fluidRow (
+                conditionalPanel (
+                  "input.Code_Type_DegreeDays == 'RHDD'",
                   
-                  column (
-                    7,
-                    "Raum-Temperatur [°C]"
-                    ),
-                  
-                  column (
-                    5,
-                    numericInput (
-                      inputId = "Temperature_HDD_Room_2", 
-                      label = NULL,
-                      value = 20,
-                      min = 15,
-                      max = 25,
-                      width = 100
-                      ), 
-                      style = "height:35px"
-                    ),
-                  
-                    style = "border: 1px dotted lightgrey"
-                  
-                  ), # End fluidRow
+                  "Gradtagzahl",
+                  plotOutput (outputId = "Plot_RHDD",
+                              height = "200px")
+                ),
                 
-                ), # END conditionalPanel
-
-                  
-        ), #### ] END tabPanel "Eingaben" ----
-            
-            
-        #######################################################################X
-        #### tabPanel "Einstellungen" START -----
-            
-        
-        tabPanel (
-          "Einstellungen",
-
-
-          fluidRow (
-
-
-            br (),
-
-            column (
-              12,
-
-              radioButtons (
-                inputId = "Code_Type_DegreeDays",
-                label = "Art der Gradtage",
-                c ("Heizgradtage (RHDD)" = "RHDD",
-                   "Gradtagzahl (HDD)" = "HDD"),
-                selected = "RHDD"
+                conditionalPanel (
+                  "input.Code_Type_DegreeDays == 'HDD'",
+                  "Heizgradtage",
+                  plotOutput (outputId = "Plot_HDD",
+                              height = "200px")
+                )
+                
               ),
-
-              "Gradtagzahl = aufsummierte Differenzen zwischen Innen- und Außentemperatur)",
-              br (),
-              "Heizgradtage = aufsummierte Differenzen zwischen Heizgrenz- und Außentemperatur)"
-              )
-            ),
-
-
-          br (),
-
-          strong ("Art der Standortwahl"),
-
-          br (),
-
-          fluidRow (
-
-          column (
-            6,
-            radioButtons (
-              inputId = "Code_Type_LocationBuilding_1",
-              label = "Klima 1",
-              c ("PLZ / 1 Station"    = "Postcode_1Station",
-                 "PLZ / 3 Stationen"  = "Postcode_3Stations",
-                 "Nummer der Station" = "ID_Station"),
-              selected = "Postcode_3Stations"
-              ),
-            style = "border: 1px dotted lightgrey"
-            ),
-
-          column (
-            6,
-            radioButtons (
-              inputId = "Code_Type_LocationBuilding_2",
-              label = "Klima 2",
-              c ("PLZ / 1 Station"    = "Postcode_1Station",
-                 "PLZ / 3 Stationen"  = "Postcode_3Stations",
-                 "Nummer der Station" = "ID_Station"),
-              selected = "Postcode_3Stations"
-              ),
-            style = "border: 1px dotted lightgrey"
-            ),
-
+              
+              conditionalPanel (
+                
+                "input.ShowPlot_HD",
+                
+                "Heiztage",
+                plotOutput (outputId = "Plot_HeatingDays",                   
+                            height = "200px"),
+              ), # End conditionalPanel
+              
+            ) #### END mainPanel ----
+            
+          ), ### END sidebarLayout ----
           
-          column (
-            12,
-
-            strong ("Solarstrahlung geneigte Fläche"),
-            
-            fluidRow (
-              
-              column (
-                7,
-                "Neigung in Grad"
-              ),
-              
-              column (
-                5,
-                selectInput (
-                  inputId = "Degree_Inclination_Solar_1", 
-                  label   = NULL,
-                  choices = c (30, 45, 60),
-                  selected = 45,
-                  width = 100
-                  ), 
-                style = "height:35px"
-                ),
-              
-              style = "border: 1px dotted lightgrey"
-              
-              ), # End fluidRow
-            
-            br (),
-          
-            ),
-
           br (),
-
-          ),
-
-          strong ("Diagramme einblenden"),
-          
-          fluidRow (
-            
-            column (
-              6,
-              column (
-                12,
-                checkboxInput(
-                  inputId =  "ShowPlot_Temperature_1",
-                  label = "Temperatur 1",
-                  value = TRUE,
-                  width = NULL
-                ),
-                style = "height:25px"
-              ),
-              column (
-                12,
-                checkboxInput (
-                  inputId =  "ShowPlot_Temperature_2",
-                  label = "Temperatur 2",
-                  value = TRUE,
-                  width = NULL
-                ),  
-                style = "height:25px"
-              )
-            ),
-            
-            column (
-              6,
-              column (
-                12,
-                checkboxInput (
-                  inputId =  "ShowPlot_RHDD_HDD",
-                  label = "Gradtagzahl, Heizgradtage",
-                  value = TRUE,
-                  width = NULL
-                ),
-                style = "height:40px"
-              ),
-              column (
-                12,
-                checkboxInput (
-                  inputId =  "ShowPlot_HD",
-                  label = "Heiztage",
-                  value = TRUE,
-                  width = NULL
-                ),
-                style = "height:25px"
-              )
-            ),
-            
-          ), # End fluidRow
-            
-
+          strong ("Klima 1 (oben) und Klima 2 (unten) / Mittel über Zeitraum"),
+          tableOutput ("Table_ClimCalc_Both"),
           
           
           br (),
           
-          strong ("Klima 2: individuelle Eingafelder einblenden"),
-          
-          fluidRow (
-            column (
-              12,
-              checkboxInput (
-                inputId =  "ShowInput_Location_2",
-                label = "Postleitzahl / Klimastation",
-                value = FALSE,
-                width = NULL
-                ),
-              style = "height:25px"
-              )
-            ),
-          
-          fluidRow (
-            column (
-              4,
-              checkboxInput (
-                inputId =  "ShowInput_LastYear_2",
-                label = "Jahr",
-                value = FALSE,
-                width = NULL
-              ),
-              style = "height:25px"
-            ),
-            
-            column (
-              8,
-              checkboxInput (
-                inputId =  "ShowInput_LastMonth_2",
-                label = "letzter Monat",
-                value = FALSE,
-                width = NULL
-              ),
-              style = "height:25px"
-            )
-            
-          ),
-          
-          checkboxInput (
-            inputId =  "ShowInput_BaseTemp_RoomTemp_2",
-            label = "Heizgrenze / Raumtemperatur",
-            value = FALSE,
-            width = NULL
-          ),
+          strong ("Klima 1"),
+          #tableOutput ("Table_HDD_Compact_1"),
+          tableOutput ("Table_ClimCalc_1"),
+          tableOutput ("Table_Evaluation_1"),
+          tableOutput ("Table_StationInfo_1"),
+          tableOutput ("Table_FunctionArguments_1"),
+          #tableOutput ("Table_OutputStructure_1"),
           
           
-
-
-
-        )             
-        #### END tabPanel "Einstellungen" -----
-
-
-            
-            
+          br (),
+          
+          strong ("Klima 2"),
+          #tableOutput ("Table_HDD_Compact_2"),
+          tableOutput ("Table_ClimCalc_2"),
+          tableOutput ("Table_Evaluation_2"),
+          tableOutput ("Table_StationInfo_2"),
+          tableOutput ("Table_FunctionArguments_2"),
+          #tableOutput ("Table_OutputStructure_2"),
+          
+          textOutput ("Text"),
+          #verbatimTextOutput ("Text")
+          
           
         )
         
-      )        
-      
-    ),
-
-  br (),
-  
-  fluidRow (
-    column (
-      4,
-      strong ("Result"),
-      tableOutput ("Table_Result_Year"),
-      #style = "height:800px;background-color: yellow",
-            
-    ),
-    style = "background-color: white"
-  )
-
-),
-    
-    
-  #### mainPanel START -----
-    
-
-  mainPanel (
-      
-      strong (""),
+        
+        
+      ), # End tabItem "Tab_Dashboard"
       
       
-      conditionalPanel (
-
-        "input.ShowPlot_Temperature_1",
-        
-        "Außentemperatur Klima 1 (Monatsmittel und Monatsmittel an Heiztagen)",
-
-        plotOutput (outputId = "TemperaturePlot_1",
-                    height = "200px"),
-        
-        ),
+      #######################################################################X
+      ## tabItem "Tab_Data"  -----
       
-      conditionalPanel (
+      tabItem (
         
-        "input.ShowPlot_Temperature_2",
+        tabName = "Tab_Data",
         
-        "Außentemperatur Klima 2 (Monatsmittel und Monatsmittel an Heiztagen)",
+        h2("Daten-Tabellen"),
         
-        plotOutput (outputId = "TemperaturePlot_2",
-                    height = "200px")
-      
-        ),
         
-      
-      conditionalPanel (
-        
-        "input.ShowPlot_RHDD_HDD",
-        
-        conditionalPanel (
-          "input.Code_Type_DegreeDays == 'RHDD'",
+        fluidPage (
           
-          "Gradtagzahl",
-          plotOutput (outputId = "Plot_RHDD",
-                      height = "200px")
+          #titlePanel ("Daten-Tabellen"),
+
+          fluidRow (
+          
+
+            # Choose Output tables ----
+            selectInput (
+              "myOutputSelection", 
+              "Choose a dataset:",
+              choices = c(
+                "ResultTable_Year",
+                "DF_ClimCalc_1",
+                "DF_ClimCalc_2",
+                "DF_ClimCalc_Both",
+                "DF_Evaluation_1",
+                "DF_Evaluation_2"
+                # "Data.TA.HD"
+              )
+            ),
+            
+            checkboxInput(
+              inputId =  "TransposeOutputTable",
+              label = "Zeilen und Spalten vertauschen",
+              value = FALSE,
+              width = NULL
+
+            ),
+            
+          
+          
+          
+            # # Button
+            # downloadButton (
+            #   outputId = "downloadData", 
+            #   class = "Download",
+            #   icon = shiny::icon("download")
+            # )
+            
           ),
+          
+          column (
+              12,
+              
+              fluidRow (
+                DT::DTOutput (
+                  "myTable"
+                )
+                
+                # tableOutput (
+                #   "myTable"
+                # )
+              )
+          
+            )
+
         
-        conditionalPanel (
-          "input.Code_Type_DegreeDays == 'HDD'",
-          "Heizgradtage",
-          plotOutput (outputId = "Plot_HDD",
-                      height = "200px")
-          )
-      
-        ),
-      
-      conditionalPanel (
+
+          
         
-        "input.ShowPlot_HD",
+            
+
+        ) # End fluid page
         
-        "Heiztage",
-        plotOutput (outputId = "Plot_HeatingDays",                   
-                    height = "200px"),
-        ), # End conditionalPanel
+        
+        
+        
+      ) # End tabItem "Tab_Data" 
       
-      ) #### END mainPanel ----
-
-    ), ### END sidebarLayout ----
+    ) # End tabItems
     
-    br (),
-    strong ("Klima 1 (oben) und Klima 2 (unten) / Mittel über Zeitraum"),
-    tableOutput ("Table_ClimCalc_Both"),
-    
-    
-    br (),
-    
-    strong ("Klima 1"),
-    #tableOutput ("Table_HDD_Compact_1"),
-    tableOutput ("Table_ClimCalc_1"),
-    tableOutput ("Table_Evaluation_1"),
-    tableOutput ("Table_StationInfo_1"),
-    tableOutput ("Table_FunctionArguments_1"),
-    #tableOutput ("Table_OutputStructure_1"),
-
-
-    br (),
-    
-    strong ("Klima 2"),
-    #tableOutput ("Table_HDD_Compact_2"),
-    tableOutput ("Table_ClimCalc_2"),
-    tableOutput ("Table_Evaluation_2"),
-    tableOutput ("Table_StationInfo_2"),
-    tableOutput ("Table_FunctionArguments_2"),
-    #tableOutput ("Table_OutputStructure_2"),
-
-    textOutput ("Text"),
-    #verbatimTextOutput ("Text")
+  ) # End dashboardBody
   
-      
-  )
+) # End dashboardPage
+
+  
+  
+  
+  
+  
+  
+  
 
 #_ -----
 
 
 #######################################################################X
-## Sever Function -----
+## Server Function -----
 
 
 server <- function (input, output, session) {
@@ -1089,20 +1277,44 @@ server <- function (input, output, session) {
   })
 
     
+  # DF_ClimCalc_1 <-
+  #   reactive ({
+  #     as.data.frame (
+  #       myResultList_1 () ["DF_ClimCalc"]
+  #     )
+  #   })
+  # 
+  # 
+  # DF_ClimCalc_2 <-
+  #   reactive ({
+  #     as.data.frame (
+  #       myResultList_2 () ["DF_ClimCalc"]
+  #     )
+  #   })
+  # 
+  
+  
   DF_ClimCalc_1 <-
     reactive ({
-      as.data.frame (
-        myResultList_1 () ["DF_ClimCalc"]
+      RemoveStringFromDFColNames (
+        myDataFrame = 
+          as.data.frame (myResultList_1 () ["DF_ClimCalc"]),
+        myStringToRemove = "DF_ClimCalc."
+        
       )
     })
   
   
   DF_ClimCalc_2 <-
     reactive ({
-      as.data.frame (
-        myResultList_2 () ["DF_ClimCalc"]
+      RemoveStringFromDFColNames (
+        myDataFrame = 
+          as.data.frame (myResultList_2 () ["DF_ClimCalc"]),
+        myStringToRemove = "DF_ClimCalc."
       )
     })
+  
+  
   
   
   DF_ClimCalc_Both <-
@@ -1111,28 +1323,28 @@ server <- function (input, output, session) {
           "Index" = c (1:24),
           "Month" = as.character (
             c (
-              DF_ClimCalc_1 () [c(1:12), "DF_ClimCalc.Month"], 
-              DF_ClimCalc_2 () [c(1:12), "DF_ClimCalc.Month"])),
+              DF_ClimCalc_1 () [c(1:12), "Month"], 
+              DF_ClimCalc_2 () [c(1:12), "Month"])),
           "Analysis" = c (rep ("Klima 1", 12), rep ("Klima 2", 12)),
           "TA" = c (
-            as.numeric (DF_ClimCalc_1 () [c(1:12), "DF_ClimCalc.TA"]) ,
-            as.numeric (DF_ClimCalc_2 () [c(1:12), "DF_ClimCalc.TA"])
+            as.numeric (DF_ClimCalc_1 () [c(1:12), "TA"]) ,
+            as.numeric (DF_ClimCalc_2 () [c(1:12), "TA"])
           ),
           "TA_HD" = c (
-            as.numeric (DF_ClimCalc_1 () [c(1:12), "DF_ClimCalc.TA_HD"]) ,
-            as.numeric (DF_ClimCalc_2 () [c(1:12), "DF_ClimCalc.TA_HD"])
+            as.numeric (DF_ClimCalc_1 () [c(1:12), "TA_HD"]) ,
+            as.numeric (DF_ClimCalc_2 () [c(1:12), "TA_HD"])
           ),
           "HD" = c (
-            as.numeric (DF_ClimCalc_1 () [c(1:12), "DF_ClimCalc.HD"]) ,
-            as.numeric (DF_ClimCalc_2 () [c(1:12), "DF_ClimCalc.HD"])
+            as.numeric (DF_ClimCalc_1 () [c(1:12), "HD"]) ,
+            as.numeric (DF_ClimCalc_2 () [c(1:12), "HD"])
             ),
           "HDD" = c (
-            as.numeric (DF_ClimCalc_1 () [c(1:12), "DF_ClimCalc.HDD"]) ,
-            as.numeric (DF_ClimCalc_2 () [c(1:12), "DF_ClimCalc.HDD"])
+            as.numeric (DF_ClimCalc_1 () [c(1:12), "HDD"]) ,
+            as.numeric (DF_ClimCalc_2 () [c(1:12), "HDD"])
           ),
           "RHDD" = c (
-            as.numeric (DF_ClimCalc_1 () [c(1:12), "DF_ClimCalc.RHDD"]) ,
-            as.numeric (DF_ClimCalc_2 () [c(1:12), "DF_ClimCalc.RHDD"])
+            as.numeric (DF_ClimCalc_1 () [c(1:12), "RHDD"]) ,
+            as.numeric (DF_ClimCalc_2 () [c(1:12), "RHDD"])
           )
       )
     })
@@ -1140,17 +1352,21 @@ server <- function (input, output, session) {
     
     DF_Evaluation_1 <-
       reactive ({
-        as.data.frame (
-          myResultList_1 () ["DF_Evaluation"]
-        ) 
+        RemoveStringFromDFColNames (
+          myDataFrame = 
+            as.data.frame (myResultList_1 () ["DF_Evaluation"]),
+          myStringToRemove = "DF_Evaluation."
+        )
       })
     
     
     DF_Evaluation_2 <-
       reactive ({
-        as.data.frame (
-          myResultList_2 () ["DF_Evaluation"]
-        ) 
+        RemoveStringFromDFColNames (
+          myDataFrame = 
+            as.data.frame (myResultList_2 () ["DF_Evaluation"]),
+          myStringToRemove = "DF_Evaluation."
+        )
       })
 
     
@@ -1311,101 +1527,115 @@ server <- function (input, output, session) {
       bordered = TRUE
       )
 
+
+    
+
+        
+    ResultTable_Year <-
+      reactive ({
+        as.data.frame (
+          t (
+            cbind (
+              Format_DataFrameForOutput (
+                # rbind (cbind ("2015-01", "2015-12"),
+                #        cbind ("2000-01", "2020-12")),
+                cbind (
+                  rbind (
+                    DF_Evaluation_1 () [
+                      1,
+                      c (
+                        "Year"
+                      )],
+                    DF_Evaluation_2 () [
+                      1,
+                      c (
+                        "Year"
+                      )]
+                  ),
+                  rbind (
+                    DF_Evaluation_1 () [
+                      nrow (DF_Evaluation_1 ()),
+                      c (
+                        "Year"
+                      )],
+                    DF_Evaluation_2 () [
+                      nrow (DF_Evaluation_2 ()),
+                      c (
+                        "Year"
+                      )]
+                  ),
+                  rbind (
+                    DF_Evaluation_1 () [
+                      1,
+                      c (
+                        "Month"
+                      )],
+                    DF_Evaluation_2 () [
+                      1,
+                      c (
+                        "Month"
+                      )]
+                  )
+                ),
+                myRowNames = c ("Klima.1", "Klima.2"),
+                myColNames = c ("Year_Start", "Year_End", "Month_Start"),
+                myDigits   = c (  0,    0)
+              ),
+              Format_DataFrameForOutput (
+                rbind (
+                  DF_ClimCalc_1 () [
+                    13,
+                    c (
+                      "D",
+                      "TA",
+                      "HD",
+                      "TA_HD",
+                      "HDD",
+                      "RHDD",
+                      "CT",
+                      "G_Hor",
+                      "G_Hor_HD",
+                      "G_E_HD",
+                      "G_S_HD",
+                      "G_W_HD",
+                      "G_N_HD"
+                    )],
+                  DF_ClimCalc_2 () [
+                    13,
+                    c (
+                      "D",
+                      "TA",
+                      "HD",
+                      "TA_HD",
+                      "HDD",
+                      "RHDD",
+                      "CT",
+                      "G_Hor",
+                      "G_Hor_HD",
+                      "G_E_HD",
+                      "G_S_HD",
+                      "G_W_HD",
+                      "G_N_HD"
+                    )]
+                ),
+                myRowNames = c ("Klima 1", "Klima 2"),
+                myColNames = c ("D", "TA", "HD", "TA_HD", "HDD", "RHDD","CT",
+                                "G_Hor","G_Hor_HD","G_E_HD","G_S_HD", "G_W_HD", "G_N_HD"),
+                myDigits   = c (  1,    2,    1,       2,     1,      1,   2,
+                                  0, 0, 0, 0, 0, 0)
+              )
+            )
+          )
+          
+        )
+      })
+      
+
+    
     
     output$Table_Result_Year <-
       renderTable ({
-        t (
-          cbind (
-            Format_DataFrameForOutput (
-              # rbind (cbind ("2015-01", "2015-12"),
-              #        cbind ("2000-01", "2020-12")),
-              cbind (
-                rbind (
-                  DF_Evaluation_1 () [
-                    1,
-                    c (
-                      "DF_Evaluation.Year"
-                      )],
-                  DF_Evaluation_2 () [
-                    1,
-                    c (
-                      "DF_Evaluation.Year"
-                    )]
-                ),
-                rbind (
-                  DF_Evaluation_1 () [
-                    nrow (DF_Evaluation_1 ()),
-                    c (
-                      "DF_Evaluation.Year"
-                    )],
-                  DF_Evaluation_2 () [
-                    nrow (DF_Evaluation_2 ()),
-                    c (
-                      "DF_Evaluation.Year"
-                    )]
-                ),
-                rbind (
-                  DF_Evaluation_1 () [
-                    1,
-                    c (
-                      "DF_Evaluation.Month"
-                    )],
-                  DF_Evaluation_2 () [
-                    1,
-                    c (
-                      "DF_Evaluation.Month"
-                    )]
-                )
-              ),
-              myRowNames = c ("Klima.1", "Klima.2"),
-              myColNames = c ("Year_Start", "Year_End", "Month_Start"),
-              myDigits   = c (  0,    0)
-            ),
-            Format_DataFrameForOutput (
-              rbind (
-                DF_ClimCalc_1 () [
-                  13,
-                  c (
-                    "DF_ClimCalc.D",
-                    "DF_ClimCalc.TA",
-                    "DF_ClimCalc.HD",
-                    "DF_ClimCalc.TA_HD",
-                    "DF_ClimCalc.HDD",
-                    "DF_ClimCalc.RHDD",
-                    "DF_ClimCalc.CT",
-                    "DF_ClimCalc.G_Hor",
-                    "DF_ClimCalc.G_Hor_HD",
-                    "DF_ClimCalc.G_E_HD",
-                    "DF_ClimCalc.G_S_HD", 
-                    "DF_ClimCalc.G_W_HD", 
-                    "DF_ClimCalc.G_N_HD"
-                  )],
-                DF_ClimCalc_2 () [
-                  13,
-                  c (
-                    "DF_ClimCalc.D",
-                    "DF_ClimCalc.TA",
-                    "DF_ClimCalc.HD",
-                    "DF_ClimCalc.TA_HD",
-                    "DF_ClimCalc.HDD",
-                    "DF_ClimCalc.RHDD",
-                    "DF_ClimCalc.CT",
-                    "DF_ClimCalc.G_Hor",
-                    "DF_ClimCalc.G_Hor_HD",
-                    "DF_ClimCalc.G_E_HD",
-                    "DF_ClimCalc.G_S_HD", 
-                    "DF_ClimCalc.G_W_HD", 
-                    "DF_ClimCalc.G_N_HD"
-                  )]
-              ),
-              myRowNames = c ("Klima 1", "Klima 2"),
-              myColNames = c ("D", "TA", "HD", "TA_HD", "HDD", "RHDD","CT",
-                "G_Hor","G_Hor_HD","G_E_HD","G_S_HD", "G_W_HD", "G_N_HD"),
-              myDigits   = c (  1,    2,    1,       2,     1,      1,   2,
-                      0, 0, 0, 0, 0, 0)
-            )
-          )
-        )
+        ResultTable_Year ()
       },
       rownames = TRUE,
       align = "r",
@@ -1418,20 +1648,129 @@ server <- function (input, output, session) {
       )
 
     
+    
+    # 2024-02-16 vor Umbau
+    #
+    # output$Table_Result_Year <-
+    #   renderTable ({
+    #     t (
+    #       cbind (
+    #         Format_DataFrameForOutput (
+    #           # rbind (cbind ("2015-01", "2015-12"),
+    #           #        cbind ("2000-01", "2020-12")),
+    #           cbind (
+    #             rbind (
+    #               DF_Evaluation_1 () [
+    #                 1,
+    #                 c (
+    #                   "DF_Evaluation.Year"
+    #                   )],
+    #               DF_Evaluation_2 () [
+    #                 1,
+    #                 c (
+    #                   "DF_Evaluation.Year"
+    #                 )]
+    #             ),
+    #             rbind (
+    #               DF_Evaluation_1 () [
+    #                 nrow (DF_Evaluation_1 ()),
+    #                 c (
+    #                   "DF_Evaluation.Year"
+    #                 )],
+    #               DF_Evaluation_2 () [
+    #                 nrow (DF_Evaluation_2 ()),
+    #                 c (
+    #                   "DF_Evaluation.Year"
+    #                 )]
+    #             ),
+    #             rbind (
+    #               DF_Evaluation_1 () [
+    #                 1,
+    #                 c (
+    #                   "DF_Evaluation.Month"
+    #                 )],
+    #               DF_Evaluation_2 () [
+    #                 1,
+    #                 c (
+    #                   "DF_Evaluation.Month"
+    #                 )]
+    #             )
+    #           ),
+    #           myRowNames = c ("Klima.1", "Klima.2"),
+    #           myColNames = c ("Year_Start", "Year_End", "Month_Start"),
+    #           myDigits   = c (  0,    0)
+    #         ),
+    #         Format_DataFrameForOutput (
+    #           rbind (
+    #             DF_ClimCalc_1 () [
+    #               13,
+    #               c (
+    #                 "DF_ClimCalc.D",
+    #                 "DF_ClimCalc.TA",
+    #                 "DF_ClimCalc.HD",
+    #                 "DF_ClimCalc.TA_HD",
+    #                 "DF_ClimCalc.HDD",
+    #                 "DF_ClimCalc.RHDD",
+    #                 "DF_ClimCalc.CT",
+    #                 "DF_ClimCalc.G_Hor",
+    #                 "DF_ClimCalc.G_Hor_HD",
+    #                 "DF_ClimCalc.G_E_HD",
+    #                 "DF_ClimCalc.G_S_HD", 
+    #                 "DF_ClimCalc.G_W_HD", 
+    #                 "DF_ClimCalc.G_N_HD"
+    #               )],
+    #             DF_ClimCalc_2 () [
+    #               13,
+    #               c (
+    #                 "DF_ClimCalc.D",
+    #                 "DF_ClimCalc.TA",
+    #                 "DF_ClimCalc.HD",
+    #                 "DF_ClimCalc.TA_HD",
+    #                 "DF_ClimCalc.HDD",
+    #                 "DF_ClimCalc.RHDD",
+    #                 "DF_ClimCalc.CT",
+    #                 "DF_ClimCalc.G_Hor",
+    #                 "DF_ClimCalc.G_Hor_HD",
+    #                 "DF_ClimCalc.G_E_HD",
+    #                 "DF_ClimCalc.G_S_HD", 
+    #                 "DF_ClimCalc.G_W_HD", 
+    #                 "DF_ClimCalc.G_N_HD"
+    #               )]
+    #           ),
+    #           myRowNames = c ("Klima 1", "Klima 2"),
+    #           myColNames = c ("D", "TA", "HD", "TA_HD", "HDD", "RHDD","CT",
+    #             "G_Hor","G_Hor_HD","G_E_HD","G_S_HD", "G_W_HD", "G_N_HD"),
+    #           myDigits   = c (  1,    2,    1,       2,     1,      1,   2,
+    #                   0, 0, 0, 0, 0, 0)
+    #         )
+    #       )
+    #     )
+    #   },
+    #   rownames = TRUE,
+    #   align = "r",
+    #   bordered = TRUE,
+    #   striped = TRUE,
+    #   spacing = "xs"
+    #   # width = "2000px"
+    #   # digits = 0 # wirkt sich auf alle aus
+    #   # digits = c (0, 0, 0, 1, 1, 1, 2) # keine Auswirkung
+    #   )
+    # 
+    
     output$Table_HDD_Compact_1 <-
       renderTable ({
         Format_DataFrameForOutput(
           DF_ClimCalc_1 () [
             c(1:13),
             c (
-              "DF_ClimCalc.Month", 
-              "DF_ClimCalc.D",
-              "DF_ClimCalc.TA",
-              "DF_ClimCalc.HD",
-              "DF_ClimCalc.TA_HD",
-              "DF_ClimCalc.HDD",
-              "DF_ClimCalc.RHDD",
-              "DF_ClimCalc.CT"
+              "Month", 
+              "D",
+              "TA",
+              "HD",
+              "TA_HD",
+              "HDD",
+              "RHDD",
+              "CT"
             )],
           myColNames = c ("Month", "D", "TA", "HD", "TA_HD", "HDD", "RHDD", "CT"),
           myDigits   = c (      0,   1,    2,    1,       2,     1,     1,     2)
@@ -1451,14 +1790,14 @@ server <- function (input, output, session) {
           DF_ClimCalc_2 () [
             c(1:13),
             c (
-              "DF_ClimCalc.Month", 
-              "DF_ClimCalc.D",
-              "DF_ClimCalc.TA",
-              "DF_ClimCalc.HD",
-              "DF_ClimCalc.TA_HD",
-              "DF_ClimCalc.HDD",
-              "DF_ClimCalc.RHDD",
-              "DF_ClimCalc.CT"
+              "Month", 
+              "D",
+              "TA",
+              "HD",
+              "TA_HD",
+              "HDD",
+              "RHDD",
+              "CT"
             )],
           myColNames = c ("Month", "D", "TA", "HD", "TA_HD", "HDD", "RHDD", "CT"),
           myDigits   = c (      0,   1,    2,    1,       2,     1,     1,     2)
@@ -1477,18 +1816,18 @@ server <- function (input, output, session) {
     y_Lim_Temperature <- reactive ({
       c (
         round (
-          min (DF_ClimCalc_1 () [ , "DF_ClimCalc.TA"],
-               DF_ClimCalc_2 () [ , "DF_ClimCalc.TA"],
-               DF_Evaluation_1 () [ , "DF_Evaluation.TA"],
-               DF_Evaluation_2 () [ , "DF_Evaluation.TA"],
+          min (DF_ClimCalc_1 () [ , "TA"],
+               DF_ClimCalc_2 () [ , "TA"],
+               DF_Evaluation_1 () [ , "TA"],
+               DF_Evaluation_2 () [ , "TA"],
                na.rm = TRUE),
           0
           ),
         round (
-          max (DF_ClimCalc_1 () [ , "DF_ClimCalc.TA"],
-               DF_ClimCalc_2 () [ , "DF_ClimCalc.TA"],
-               DF_Evaluation_1 () [ , "DF_Evaluation.TA"],
-               DF_Evaluation_2 () [ , "DF_Evaluation.TA"],
+          max (DF_ClimCalc_1 () [ , "TA"],
+               DF_ClimCalc_2 () [ , "TA"],
+               DF_Evaluation_1 () [ , "TA"],
+               DF_Evaluation_2 () [ , "TA"],
                na.rm = TRUE),
           0
           )
@@ -1504,8 +1843,8 @@ server <- function (input, output, session) {
         ggplot2::geom_point (
           data = DF_ClimCalc_1 () [1:12, ],
           mapping = ggplot2::aes (
-            x = DF_ClimCalc_1 () [1:12, "DF_ClimCalc.ID"],
-            y = DF_ClimCalc_1 () [1:12, "DF_ClimCalc.TA"]
+            x = DF_ClimCalc_1 () [1:12, "ID"],
+            y = DF_ClimCalc_1 () [1:12, "TA"]
             ),
           colour = 'grey', 
           size = 1, 
@@ -1513,18 +1852,18 @@ server <- function (input, output, session) {
           show.legend = TRUE
           ) +
         # ggplot2::geom_line (
-        #   mapping = aes (x = (myDF_ClimCalc [1:12, "DF_ClimCalc.ID"]) ,
-        #                  y = myDF_ClimCalc [1:12, "DF_ClimCalc.TA"], group = 1),
+        #   mapping = aes (x = (myDF_ClimCalc [1:12, "ID"]) ,
+        #                  y = myDF_ClimCalc [1:12, "TA"], group = 1),
         #   colour = 'red', size = 0.1) +
         # ggplot2::geom_line (
         #   mapping = ggplot2::aes (
         #     x = 1:12,
-        #     y = DF_ClimCalc_1 () [1:12, "DF_ClimCalc.TA"]
+        #     y = DF_ClimCalc_1 () [1:12, "TA"]
         #   ),
         #   colour = 'black', linewidth = 0.5) +
         ggplot2::scale_x_discrete (
           name = "Monat",
-          labels = DF_ClimCalc_1 () [1:12, "DF_ClimCalc.Month"]) +
+          labels = DF_ClimCalc_1 () [1:12, "Month"]) +
         ggplot2::ylab ("Temperatur [°C]") +
         ggplot2::geom_hline (yintercept=0) +
         ggplot2::theme (legend.position = c (0.5, 0.5)) +
@@ -1542,8 +1881,8 @@ server <- function (input, output, session) {
         ggplot2::geom_point (
           data = DF_ClimCalc_2 () [1:12, ],
           mapping = ggplot2::aes (
-              x = DF_ClimCalc_2 () [1:12, "DF_ClimCalc.ID"],
-              y = DF_ClimCalc_2 () [1:12, "DF_ClimCalc.TA"]
+              x = DF_ClimCalc_2 () [1:12, "ID"],
+              y = DF_ClimCalc_2 () [1:12, "TA"]
             ),
             colour = 'grey', 
             size = 1, 
@@ -1551,18 +1890,18 @@ server <- function (input, output, session) {
             show.legend = TRUE
           ) +
         # ggplot2::geom_line (
-        #   mapping = aes (x = (myDF_ClimCalc [1:12, "DF_ClimCalc.ID"]) ,
-        #                  y = myDF_ClimCalc [1:12, "DF_ClimCalc.TA"], group = 1),
+        #   mapping = aes (x = (myDF_ClimCalc [1:12, "ID"]) ,
+        #                  y = myDF_ClimCalc [1:12, "TA"], group = 1),
         #   colour = 'red', size = 0.1) +
         # ggplot2::geom_line (
         #   mapping = ggplot2::aes (
         #     x = 1:12,
-        #     y = DF_ClimCalc_2 () [1:12, "DF_ClimCalc.TA"]
+        #     y = DF_ClimCalc_2 () [1:12, "TA"]
         #   ),
         #   colour = 'black', linewidth = 0.5) +
         ggplot2::scale_x_discrete (
           name = "Monat",
-          labels = DF_ClimCalc_2 () [1:12, "DF_ClimCalc.Month"]) +
+          labels = DF_ClimCalc_2 () [1:12, "Month"]) +
         ggplot2::ylab ("Temperatur [°C]") +
         ggplot2::geom_hline (yintercept=0) + 
         # labs (title="Monatsmittel und Monatsmittel an Heiztagen (blau)") +
@@ -1577,24 +1916,24 @@ server <- function (input, output, session) {
         ggplot2::geom_line (
           mapping =
             ggplot2::aes (
-              x = DF_Evaluation_1     () [ , "DF_Evaluation.Index_EvalMonth"],
-              y = DF_Evaluation_1     () [ , "DF_Evaluation.TA"],
-              group = DF_Evaluation_1 () [ , "DF_Evaluation.Index_EvalYear"]
+              x = DF_Evaluation_1     () [ , "Index_EvalMonth"],
+              y = DF_Evaluation_1     () [ , "TA"],
+              group = DF_Evaluation_1 () [ , "Index_EvalYear"]
             ),
           colour = 'lightgrey', linewidth = 0.5, na.rm = TRUE) +   # 'lightgrey', linewidth = 0.01
         ggplot2::geom_line (
           mapping =
             ggplot2::aes (
-              x = DF_Evaluation_1     () [ , "DF_Evaluation.Index_EvalMonth"],
-              y = DF_Evaluation_1     () [ , "DF_Evaluation.TA_HD"],
-              group = DF_Evaluation_1 () [ , "DF_Evaluation.Index_EvalYear"]
+              x = DF_Evaluation_1     () [ , "Index_EvalMonth"],
+              y = DF_Evaluation_1     () [ , "TA_HD"],
+              group = DF_Evaluation_1 () [ , "Index_EvalYear"]
             ),
           colour = 'lightblue', linewidth = 0.5, na.rm = TRUE) +  # 'lightblue', linewidth = 0.01
         ggplot2::geom_point (
           data = DF_ClimCalc_1 () [1:12, ],
           mapping = ggplot2::aes (
-            x = DF_ClimCalc_1 () [1:12, "DF_ClimCalc.ID"],
-            y = DF_ClimCalc_1 () [1:12, "DF_ClimCalc.TA"]
+            x = DF_ClimCalc_1 () [1:12, "ID"],
+            y = DF_ClimCalc_1 () [1:12, "TA"]
           ),
           colour = 'black', 
           size = 3, 
@@ -1604,7 +1943,7 @@ server <- function (input, output, session) {
         ggplot2::geom_line (
           mapping = ggplot2::aes (
             x = 1:12,
-            y = DF_ClimCalc_1 () [1:12, "DF_ClimCalc.TA"]
+            y = DF_ClimCalc_1 () [1:12, "TA"]
           ),
           colour = 'black', 
           linewidth = 0.5, 
@@ -1645,7 +1984,7 @@ server <- function (input, output, session) {
           mapping =
             ggplot2::aes (
               x = 1:12,
-              y = DF_ClimCalc_1     () [1:12, "DF_ClimCalc.TA_HD"]
+              y = DF_ClimCalc_1     () [1:12, "TA_HD"]
             ),
           colour = 'blue', 
           linewidth = 1.0, 
@@ -1657,7 +1996,7 @@ server <- function (input, output, session) {
           mapping =
             ggplot2::aes (
               x = 1:12,
-              y = DF_ClimCalc_1     () [1:12, "DF_ClimCalc.TA_HD"]
+              y = DF_ClimCalc_1     () [1:12, "TA_HD"]
             ),
           colour = 'blue', 
           size = 3.0, 
@@ -1669,7 +2008,7 @@ server <- function (input, output, session) {
             ggplot2::aes (
               x = c (1:12, 1:12),
               y = c (
-                as.numeric (DF_ClimCalc_1     () [1:12, "DF_ClimCalc.TA_HD"]) ,
+                as.numeric (DF_ClimCalc_1     () [1:12, "TA_HD"]) ,
                 rep (as.numeric (
                   if (input$Code_Type_DegreeDays == "RHDD") {
                     input$Temperature_HDD_Room_1  
@@ -1696,30 +2035,30 @@ server <- function (input, output, session) {
         ggplot2::geom_line (
           mapping =
             ggplot2::aes (
-              x = DF_Evaluation_2     () [ , "DF_Evaluation.Index_EvalMonth"],
-              y = DF_Evaluation_2     () [ , "DF_Evaluation.TA"],
-              group = DF_Evaluation_2 () [ , "DF_Evaluation.Index_EvalYear"]
+              x = DF_Evaluation_2     () [ , "Index_EvalMonth"],
+              y = DF_Evaluation_2     () [ , "TA"],
+              group = DF_Evaluation_2 () [ , "Index_EvalYear"]
             ),
           colour = 'lightgrey', linewidth = 0.5, na.rm = TRUE) + # 'lightgrey', linewidth = 0.01
         ggplot2::geom_line (
           mapping =
             ggplot2::aes (
-              x = DF_Evaluation_2     () [ , "DF_Evaluation.Index_EvalMonth"],
-              y = DF_Evaluation_2     () [ , "DF_Evaluation.TA_HD"],
-              group = DF_Evaluation_2 () [ , "DF_Evaluation.Index_EvalYear"]
+              x = DF_Evaluation_2     () [ , "Index_EvalMonth"],
+              y = DF_Evaluation_2     () [ , "TA_HD"],
+              group = DF_Evaluation_2 () [ , "Index_EvalYear"]
             ),
           colour = 'lightblue', linewidth = 0.5, na.rm = TRUE) +   # 'lightgrey', linewidth = 0.01
         ggplot2::geom_point (
           data = DF_ClimCalc_2 () [1:12, ],
           mapping = ggplot2::aes (
-            x = DF_ClimCalc_2 () [1:12, "DF_ClimCalc.ID"],
-            y = DF_ClimCalc_2 () [1:12, "DF_ClimCalc.TA"]
+            x = DF_ClimCalc_2 () [1:12, "ID"],
+            y = DF_ClimCalc_2 () [1:12, "TA"]
           ),
           colour = 'black', size = 3, na.rm = TRUE) +
         ggplot2::geom_line (
           mapping = ggplot2::aes (
             x = 1:12,
-            y = DF_ClimCalc_2 () [1:12, "DF_ClimCalc.TA"]
+            y = DF_ClimCalc_2 () [1:12, "TA"]
           ),
           colour = 'black', linewidth = 0.5, na.rm = TRUE) +
         ggplot2::geom_line (
@@ -1746,14 +2085,14 @@ server <- function (input, output, session) {
           mapping =
             ggplot2::aes (
               x = 1:12,
-              y = DF_ClimCalc_2     () [1:12, "DF_ClimCalc.TA_HD"]
+              y = DF_ClimCalc_2     () [1:12, "TA_HD"]
             ),
           colour = 'blue', linewidth = 1.0, linetype = "dashed", na.rm = TRUE) + 
         ggplot2::geom_point (
           mapping =
             ggplot2::aes (
               x = 1:12,
-              y = DF_ClimCalc_2     () [1:12, "DF_ClimCalc.TA_HD"]
+              y = DF_ClimCalc_2     () [1:12, "TA_HD"]
             ),
           colour = 'blue', size = 3.0, na.rm = TRUE) + 
         ggplot2::geom_line (
@@ -1761,7 +2100,7 @@ server <- function (input, output, session) {
             ggplot2::aes (
               x = c (1:12, 1:12),
               y = c (
-                as.numeric (DF_ClimCalc_2     () [1:12, "DF_ClimCalc.TA_HD"]) ,
+                as.numeric (DF_ClimCalc_2     () [1:12, "TA_HD"]) ,
                 rep (as.numeric (
                   if (input$Code_Type_DegreeDays == "RHDD") {
                     input$Temperature_HDD_Room_2  
@@ -1810,13 +2149,13 @@ server <- function (input, output, session) {
         ) + 
         ggplot2::scale_x_discrete (
           name = "Monat",
-          limits = factor (DF_ClimCalc_1 () [1:12, "DF_ClimCalc.Month"]),
-          labels = DF_ClimCalc_1 () [1:12, "DF_ClimCalc.Month"]) +
+          limits = factor (DF_ClimCalc_1 () [1:12, "Month"]),
+          labels = DF_ClimCalc_1 () [1:12, "Month"]) +
         ggplot2::ylab ("Gradtagzahl [Kd/a]") +
         ggplot2::scale_fill_brewer (palette = "Dark2") +
         ggplot2::theme (legend.position = c (
           0.07 + 0.93 *
-            ((as.numeric (7 - (DF_ClimCalc_1 () [1, "DF_ClimCalc.Month"])) / 12) %% 1), 
+            ((as.numeric (7 - (DF_ClimCalc_1 () [1, "Month"])) / 12) %% 1), 
           0.8
           )) +
         ggplot2::theme (legend.title = ggplot2::element_blank ())
@@ -1846,13 +2185,13 @@ server <- function (input, output, session) {
         ) + 
         ggplot2::scale_x_discrete (
           name = "Monat",
-          limits = factor (DF_ClimCalc_1 () [1:12, "DF_ClimCalc.Month"]),
-          labels = DF_ClimCalc_1 () [1:12, "DF_ClimCalc.Month"]) +
+          limits = factor (DF_ClimCalc_1 () [1:12, "Month"]),
+          labels = DF_ClimCalc_1 () [1:12, "Month"]) +
         ggplot2::ylab ("Heizgradtage [Kd/a]") +
         ggplot2::scale_fill_brewer (palette = "Dark2") +
         ggplot2::theme (legend.position = c (
             0.07 + 0.93 *
-              ((as.numeric (7 - (DF_ClimCalc_1 () [1, "DF_ClimCalc.Month"])) / 12) %% 1), 
+              ((as.numeric (7 - (DF_ClimCalc_1 () [1, "Month"])) / 12) %% 1), 
             0.8
           )) +
         ggplot2::theme (legend.title = ggplot2::element_blank ())
@@ -1881,22 +2220,153 @@ server <- function (input, output, session) {
         ) + 
         ggplot2::scale_x_discrete (
           name = "Monat",
-          limits = factor (DF_ClimCalc_1 () [1:12, "DF_ClimCalc.Month"]),
-          labels = DF_ClimCalc_1 () [1:12, "DF_ClimCalc.Month"]) +
+          limits = factor (DF_ClimCalc_1 () [1:12, "Month"]),
+          labels = DF_ClimCalc_1 () [1:12, "Month"]) +
         ggplot2::ylab ("Heiztage [d]") +
         ggplot2::scale_fill_brewer (palette = "Pastel2") +
         ggplot2::theme (legend.position = c (
             0.07 + 0.93 *
-              ((as.numeric (7 - (DF_ClimCalc_1 () [1, "DF_ClimCalc.Month"])) / 12) %% 1), 
+              ((as.numeric (7 - (DF_ClimCalc_1 () [1, "Month"])) / 12) %% 1), 
             0.8
           )) +
         ggplot2::theme (legend.title = ggplot2::element_blank ())
       
         #ggplot2::theme (legend.position = "bottom")
 
-      })
+      }) # End render plot
 
-    }
+    
+    
+    #######################################################################X
+    ## Select and download data table  -----
+    
+    myOutputDataframe <- reactive ({
+      
+      switch (
+        
+        input$myOutputSelection,
+        
+        "ResultTable_Year" = ResultTable_Year (),
+        
+        "DF_ClimCalc_1"    = DF_ClimCalc_1 (),
+          # RemoveStringFromDFColNames (
+          #   DF_ClimCalc_1 (),
+          #   "DF_ClimCalc."
+          # ),
+        
+        # "DF_ClimCalc_1"    = 
+        #   t (
+        #     Format_DataFrameForOutput (
+        #       myDataFrame = DF_ClimCalc_1 (),
+        #       myColNames = 
+        #         gsub (
+        #           pattern = "DF_ClimCalc.", 
+        #           replacement = "",
+        #           x = colnames (DF_ClimCalc_1 ())
+        #         )
+        #     )
+        #   ),
+        
+        "DF_ClimCalc_2"    = DF_ClimCalc_2 (), 
+          # RemoveStringFromDFColNames (
+          #   DF_ClimCalc_2 (),
+          #   "DF_ClimCalc."
+          # ),
+        
+        "DF_ClimCalc_Both" = DF_ClimCalc_Both (),
+        
+        "DF_Evaluation_1"  = DF_Evaluation_1 (),
+          # RemoveStringFromDFColNames (
+          #     DF_Evaluation_1 (),
+          #     "DF_Evaluation."
+          #   ),
+        
+        "DF_Evaluation_2"  = DF_Evaluation_2 (),
+          # RemoveStringFromDFColNames (
+          #   DF_Evaluation_2 (),
+          #   "DF_Evaluation."
+          # )
+        
+        # "Data.TA.HD"  = clidamonger::data.ta.hd
+        
+      )
+    })
+    
+    # Table of selected dataset ----
+    # output$myTable <- DT::renderDataTable  ({
+    #   if (input$TransposeOutputTable == TRUE) {
+    #     t (myOutputDataframe ()) 
+    #   } else {
+    #     myOutputDataframe ()
+    #   }
+    # },
+    # fill = FALSE,
+    # width = "100%",
+    # height = 1000 # "auto"
+    # )
+    
+    output$myTable <- 
+      DT::renderDataTable  ({
+          if (input$TransposeOutputTable == TRUE) {
+            t (myOutputDataframe ()) 
+          } else {
+            myOutputDataframe ()
+          }
+        },
+        extensions = 'Buttons', 
+        options = 
+          list (
+            dom = 'Blfrtip',
+            buttons = c('copy', 'csv', 'excel', 'pdf'),
+            lengthMenu = list(c(-1, 100, 50, 20), 
+                              c('All', '100', '50', '20')),
+            paging = T
+            )
+      )
+    
+    
+    
+    # output$myTable <- renderTable ({
+    #   if (input$TransposeOutputTable == TRUE) {
+    #       t (myOutputDataframe ()) 
+    #     } else {
+    #       myOutputDataframe ()
+    #     }
+    #   },
+    #   rownames = TRUE,
+    #   align = "r",
+    #   bordered = TRUE,
+    #   striped = TRUE,
+    #   spacing = "xs",
+    #   hover = TRUE
+    #   )
+    
+    
+    # Downloadable csv of selected dataset ----
+    output$downloadData <- 
+      downloadHandler (
+        filename = function () {
+          paste0 (
+            input$myOutputSelection, 
+            ".csv"
+            )
+        },
+        content = function (file) {
+          write.csv (
+              myOutputDataframe ()
+            , 
+            file, 
+            row.names = FALSE,
+            dec = ",",
+            sep = ";"
+            )
+        }
+      )
+    
+    
+    
+    
+    } # End Server function
 
 
 shinyApp (ui = ui, server = server)
