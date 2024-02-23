@@ -20,6 +20,7 @@ devtools::install_github ("TobiasLoga/AuxFunctions")
 
 library (shiny)
 library (shinydashboard)
+library (markdown)
 
 library (clidamonger)
 library (CliDaMon)
@@ -291,37 +292,39 @@ CliDaMonDisplay <- function (
 ## User Interface -----
 
 
-ui <- dashboardPage (
+ui <- shinydashboard::dashboardPage (
+
+  #library (shinydashboard),
   
-  dashboardHeader (
+  shinydashboard::dashboardHeader (
     title = "IWU - Gradtagzahlen"
   ),
   
-  dashboardSidebar ( 
+  shinydashboard::dashboardSidebar ( 
     
     #minified = FALSE, 
     #collapsed = FALSE, 
     
-    sidebarMenu (
-      menuItem (
+    shinydashboard::sidebarMenu (
+      shinydashboard::menuItem (
         "Info",      
         tabName = "Tab_Info",      
-        icon = icon ("info-circle")
+        icon = shiny::icon ("info-circle")
         ),
-      menuItem (
+      shinydashboard::menuItem (
         "Dashboard", 
         tabName = "Tab_Dashboard",
-        icon = icon ("chart-line", class = NULL, lib = "font-awesome"),
+        icon = shiny::icon ("chart-line", class = NULL, lib = "font-awesome"),
 #        icon = fontawesome::fa ("chart-line"),
 #        icon = fontawesome::fa ("fa-solid fa-chart-line"),
 #          icon = icon ("fa-solid fa-chart-line"),
 #        icon = icon ("dashboard"),
         selected = TRUE
         ),
-      menuItem (
+      shinydashboard::menuItem (
         "Daten",     
         tabName = "Tab_Data",          
-        icon = icon ("table")
+        icon = shiny::icon ("table")
         )
     ) # End side barMenu
     
@@ -333,22 +336,25 @@ ui <- dashboardPage (
   #######################################################################X
   ## Dashboard Body -----
   
-  dashboardBody (
+  shinydashboard::dashboardBody (
     
-    tabItems (
+    shinydashboard::tabItems (
       
       
       #######################################################################X
       ## tabItem "Tab_Info"  -----
       
-      tabItem (
+      shinydashboard::tabItem (
         
         tabName = "Tab_Info",
         
         # h2 ("Information"),
         
+        includeMarkdown ("info/info.Rmd")
+        #includeHTML ("info.html")
+        #includeMarkdown ("info/info.Rmd")
         
-        includeMarkdown ("R/Info.Rmd")
+        #htmltools::includeMarkdown ("R/Info.Rmd")
         #includeMarkdown ("Info.Rmd")
         
         
@@ -369,7 +375,7 @@ ui <- dashboardPage (
       #######################################################################X
       ## tabItem "Tab_Dashboard"  -----
       
-      tabItem (
+      shinydashboard::tabItem (
         
         tabName = "Tab_Dashboard",
         
@@ -1216,7 +1222,7 @@ ui <- dashboardPage (
       #######################################################################X
       ## tabItem "Tab_Data"  -----
       
-      tabItem (
+      shinydashboard::tabItem (
         
         tabName = "Tab_Data",
         
