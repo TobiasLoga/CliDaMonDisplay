@@ -1,0 +1,64 @@
+## IWU - Gradtagzahlen Deutschland - Shiny App
+Version: 23.02.2024
+
+## Erläuterungen 
+
+Diese Shiny-App dient der Ermittlung von Monatswerten für Klimadaten, die in der energetischen Bilanzierung und bei der Klimabereinigung verwendet werden können. Sie umfasst einen Teil der Funktionalität des Excel-Tools 'Gradtagzahlen-Deutschland.xlsx'. Das Tool wurde im Kontext des Forschungsprojektes MOBASY erstellt. 
+
+Wir stellen das Werkzeug gerne anderen Experten zur Nutzung Verfügung, können jedoch keinerlei Support übernehmen. Wir übernehmen keine Gewähr für die Vollständigkeit, Richtigkeit und Genauigkeit der Berechnungen und der Daten. Fehler können gemeldet werden an: Tobias Loga t.loga@iwu.de
+
+
+### Erläuterung der Variablen 
+
+- **D [d] Tage (days)** <br>
+   Länge der betrachteten Periode
+
+- **TA [°C] Außenlufttemperatur (air temperature)**
+
+- **HD [d] Heiztage (heating days)**  <br>
+   Heiztage sind Tage an denen die über den Tag gemittelte Außenlufttemperatur unter der Heizgrenztemperatur liegt.
+
+- **HDD [Kd] Heizgradtage (heating degree days)** <br>
+   Zur Ermittlung der Heizgradtage eines Monats werden die an Heiztagen auftretenden Differenzen zwischen der Heizgrenztemperatur und dem Tagesmittel der Außenlufttemperatur erfasst und aufsummiert.
+
+- **RHDD [Kd] Gradtagzahlen	(room heating degree days)** <br>
+   Zur Ermittlung der Gradtagszahl eines Monats werden die an Heiztagen auftretenden Differenzen zwischen der Raumtemperatur und dem Tagesmittel der Außenlufttemperatur erfasst und aufsummiert.
+
+- **CT [-] Indikator für die Vollständigkeit (completeness indicator)** <br>
+   Der Indikator kann im Prinzip Werte zwischen 0,00 und 1,00 annehmen. Ein Wert von 0,95 bedeutet beispielsweise, dass für 5% des Zeitraums keine Messdaten für die Außentemperatur vorliegen (Messdatenausfälle der Wetter-Stationen). 
+
+- **G_Hor, G_E, G_S, G_W, G_N [kWh] Globalstrahlung auf unterschiedliche Orientierungen** <br>
+   Monatswerte bzw. Jahreswerte Globalstrahlung; Orientierung der Flächen horizontal sowie vertikal Ost, Süd, West, Nord
+
+- **G_Hor_HD, G_E_HD, G_S_HD, G_W_HD, G_N_HD [kWh] Globalstrahlung an Heiztagen** <br>
+  Monatswerte bzw. Jahreswerte Globalstrahlung an Heiztagen; Orientierung der Flächen horizontal sowie vertikal Ost, Süd, West, Nord
+
+
+### Gradtagzahl oder Heizgradtage - Welchen Wert wofür verwenden?										
+
+Die Gradtagzahl ist die richtige Eingangsgröße für eine Energiebilanzrechnung, bei der innerhalb der Heizperiode solare und interne Gewinne mit berücksichtigt werden, wodurch sich der Wärmebedarf entsprechend reduziert.										
+Heizgradtage sind der geeignete Vergleichswert um für gemessene Verbräuche eine Klimabereinigung vorzunehmen. Dabei wird der Verbrauchswert durch die entsprechenden Heizgradtage geteilt, woduch sich ein Wärmebedarf pro Temperaturdifferenz ergibt. Durch den Vergleich dieser Werte für mehrere Heizperioden lässt sich feststellen, ob sich ein Verbrauchswert klimabereinigt vermindert oder erhöht hat.
+
+
+### Welches Gebäude hat welche Heizgrenze?										
+
+Je besser der Wärmeschutz eines Gebäudes ist, um so niedriger liegt die Heizgrenztemperatur. 								
+
+Im Folgenden sind Anhaltswerte für die Heizgrenztemperatur genannt:			
+
+|  Baustandard	         | Heizgrenze |
+|  --------------------- | ---------- |
+|  Bestandsgebäude	     |   15,0 °C  |								
+|  Niedrigenergiehäuser	 |   12,0 °C	|					
+|  Passivhäuser	         |   10,0 °C  |						
+
+
+Diese Heizgrenztemperaturen gelten für Standardansätze des Klimas und der Nutzung (z.B. Raumtemperatur 20°C). Die tatsächliche Heizgrenztemperatur eines Gebäudes kann jedoch deutlich davon abweichen. Gegenüber den genannten Zahlenwerten erhöhte Werte können sich beispielsweise bei höheren Raumtemperaturen oder bei starker Verschattung der Fenster ergeben. 		
+
+23-02-2024
+
+Institut Wohnen und Umwelt GmbH
+
+Tobias Loga 									
+
+www.iwu.de 

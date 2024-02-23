@@ -1,3 +1,19 @@
+#####################################################################################X
+##
+##    File name:        "CliDaMonDisplay.R"
+##
+##    Project:          MOBASY
+##
+##    Author:           Tobias Loga (t.loga@iwu.de)
+##                      IWU - Institut Wohnen und Umwelt, Darmstadt / Germany
+##
+##    Created:          22-04-2022
+##    Last changes:     23-02-2024
+##
+#####################################################################################X
+
+
+
 
 devtools::install_github ("TobiasLoga/CliDaMon")
 devtools::install_github ("TobiasLoga/AuxFunctions")
@@ -11,7 +27,7 @@ library (AuxFunctions)
 
 
 #######################################################################X
-## Functions -----
+## Functions -----      
 
 
 DataFrame_FixRows <- function (
@@ -208,6 +224,69 @@ CalculateClimate <- function (
 #_ -----
 
 
+
+#####################################################################################X
+## FUNCTION / SHINY APP "ClimateByMonthDisplay ()" -----
+#####################################################################################X
+
+
+#' @title Shiny App for calculating and displaying monthly climate data - heating degree days and solar radiation by postcode
+#'
+#' @description
+#' Monthly and annual climate data are provided for specific periods
+#' allocated to German postcode zone. The climate data can be used to calculate
+#' the energy demand for space heating. Temperature and solar radiation during heating days
+#' as well as degree days are provided for specific base temperatures (10°C, 12°C, and 15°C).
+#'
+#' The package "CliDaMonDisplay" is using the data package 'clidamonger' containing monthly values for more than 800 German weather stations (starting from 1995) and the calculation package 'CliDaMon' for finding the three closest weather stations to a postcode and for calculating the degree days. The packages are based on the IWU Excel Workbook 'Gradtagzahlen-Deutschland' (available at https://www.iwu.de/publikationen/fachinformationen/energiebilanzen/gradtagzahltool/ - the algorithms are similar but not identical)
+#'
+#' @param Year_SelectionList_Last an integer indicating the last year to be included 
+#' in the selection list of the user interface. The input should correspond 
+#' to the data included in the used R data package 'clidamonger'.  
+#'
+#' @param Year_SelectionList_First an integer indicating the first year to be included 
+#' in the selection list of the user interface. The input should correspond 
+#' to the data included in the R data package 'clidamonger'. The default value is 1995.  
+#'
+#' @param Year_Selected an integer indicating the preselected year in the selection list.   
+#'
+#' @param Month_Selected an integer indicating the preselected momth in the selection list.   
+#'
+#' @return Run the interactive shiny app. 
+#' The input and output is assigned to climate 1 (default: 1 year) 
+#' and to climate 2 (default: long term average).  
+#' The output dataframes for each of both climates are:
+#'
+#' DF_ClimCalc:          a dataframe containing climate data for 12 months and the complete year.
+#'                       If more than one year is evaluated the resulting values of each month
+#'                       is the average of this month and the result data of the year
+#'                       is an average year.
+#'
+#' DF_Evaluation:        a dataframe containing climate data for all considered months.
+#'
+#' DF_StationInfo:       a dataframe containing information about the used climate stations.
+#'
+#' DF_FunctionArguments: a dataframe containing the values of all function arguments (one row).
+#'
+#'
+#' @examples 
+#' CliDaMonDisplay (
+#'    Year_SelectionList_Last = 2023,
+#'    Year_Selected           = 2023,
+#'    Month_Selected          = 12
+#'    )
+#'
+#' @export
+CliDaMonDisplay <- function (
+    Year_SelectionList_Last  = 2023,
+    Year_SelectionList_First = 1995,
+    Year_Selected  = 2023,
+    Month_Selected = 12
+) {
+  
+
+
+
 #######################################################################X
 ## User Interface -----
 
@@ -220,8 +299,8 @@ ui <- dashboardPage (
   
   dashboardSidebar ( 
     
-    minified = FALSE, 
-    collapsed = FALSE, 
+    #minified = FALSE, 
+    #collapsed = FALSE, 
     
     sidebarMenu (
       menuItem (
@@ -231,8 +310,11 @@ ui <- dashboardPage (
         ),
       menuItem (
         "Dashboard", 
-        tabName = "Tab_Dashboard", 
-        icon = icon ("fa-solid fa-chart-line"),
+        tabName = "Tab_Dashboard",
+        icon = icon ("chart-line", class = NULL, lib = "font-awesome"),
+#        icon = fontawesome::fa ("chart-line"),
+#        icon = fontawesome::fa ("fa-solid fa-chart-line"),
+#          icon = icon ("fa-solid fa-chart-line"),
 #        icon = icon ("dashboard"),
         selected = TRUE
         ),
@@ -263,10 +345,20 @@ ui <- dashboardPage (
         
         tabName = "Tab_Info",
         
-        h2 ("Information")
+        # h2 ("Information"),
         
         
-        # source ($$)
+        includeMarkdown ("R/Info.Rmd")
+        #includeMarkdown ("Info.Rmd")
+        
+        
+        
+
+
+
+      # source () funktioniert irgendwie nicht.  
+      # source ("R/Info.Rmd", local = knitr::knit_global())
+        
         
         
       ), # End tabItem "Tab_Info"
@@ -416,8 +508,10 @@ ui <- dashboardPage (
                       inputId = "Year_End_1",
                       label = NULL,
                       #label   = "Jahr",
-                      choices = c (1995:2023),
-                      selected = 2021,
+                      choices = c (Year_SelectionList_First:Year_SelectionList_Last),
+                      #choices = c (1995:2023),
+                      selected = Year_Selected,
+                      #selected = 2021,
                       width = 100
                     ),
                     style = "height:35px"
@@ -445,7 +539,8 @@ ui <- dashboardPage (
                       label = NULL,
                       #label   = "letzter Monat",
                       choices = c (1:12),
-                      selected = 12,
+                      selected = Month_Selected,
+                      #selected = 12,
                       width = 100
                     ),
                     style = "height:35px"
@@ -636,8 +731,9 @@ ui <- dashboardPage (
                         inputId = "Year_End_2",
                         label = NULL,
                         # label   = "Jahr",
-                        choices = c (1995:2023),
-                        selected = 2021,
+                        choices = c (Year_SelectionList_First:Year_SelectionList_Last),
+                        #choices = c (1995:2023),
+                        selected = Year_Selected,
                         width = 100
                       ), 
                       style = "height:35px"
@@ -668,7 +764,7 @@ ui <- dashboardPage (
                         label = NULL,
                         # label   = "letzter Monat",
                         choices = c (1:12),
-                        selected = 12,
+                        selected = Month_Selected,
                         width = 100
                       ), 
                       style = "height:35px"
@@ -1137,7 +1233,7 @@ ui <- dashboardPage (
             # Choose Output tables ----
             selectInput (
               "myOutputSelection", 
-              "Choose a dataset:",
+              "Choose an output table:",
               choices = c(
                 "ResultTable_Year",
                 "DF_ClimCalc_1",
@@ -1527,9 +1623,6 @@ server <- function (input, output, session) {
       bordered = TRUE
       )
 
-
-    
-
         
     ResultTable_Year <-
       reactive ({
@@ -1632,7 +1725,6 @@ server <- function (input, output, session) {
       
 
     
-    
     output$Table_Result_Year <-
       renderTable ({
         ResultTable_Year ()
@@ -1647,119 +1739,10 @@ server <- function (input, output, session) {
       # digits = c (0, 0, 0, 1, 1, 1, 2) # keine Auswirkung
       )
 
-    
-    
-    # 2024-02-16 vor Umbau
-    #
-    # output$Table_Result_Year <-
-    #   renderTable ({
-    #     t (
-    #       cbind (
-    #         Format_DataFrameForOutput (
-    #           # rbind (cbind ("2015-01", "2015-12"),
-    #           #        cbind ("2000-01", "2020-12")),
-    #           cbind (
-    #             rbind (
-    #               DF_Evaluation_1 () [
-    #                 1,
-    #                 c (
-    #                   "DF_Evaluation.Year"
-    #                   )],
-    #               DF_Evaluation_2 () [
-    #                 1,
-    #                 c (
-    #                   "DF_Evaluation.Year"
-    #                 )]
-    #             ),
-    #             rbind (
-    #               DF_Evaluation_1 () [
-    #                 nrow (DF_Evaluation_1 ()),
-    #                 c (
-    #                   "DF_Evaluation.Year"
-    #                 )],
-    #               DF_Evaluation_2 () [
-    #                 nrow (DF_Evaluation_2 ()),
-    #                 c (
-    #                   "DF_Evaluation.Year"
-    #                 )]
-    #             ),
-    #             rbind (
-    #               DF_Evaluation_1 () [
-    #                 1,
-    #                 c (
-    #                   "DF_Evaluation.Month"
-    #                 )],
-    #               DF_Evaluation_2 () [
-    #                 1,
-    #                 c (
-    #                   "DF_Evaluation.Month"
-    #                 )]
-    #             )
-    #           ),
-    #           myRowNames = c ("Klima.1", "Klima.2"),
-    #           myColNames = c ("Year_Start", "Year_End", "Month_Start"),
-    #           myDigits   = c (  0,    0)
-    #         ),
-    #         Format_DataFrameForOutput (
-    #           rbind (
-    #             DF_ClimCalc_1 () [
-    #               13,
-    #               c (
-    #                 "DF_ClimCalc.D",
-    #                 "DF_ClimCalc.TA",
-    #                 "DF_ClimCalc.HD",
-    #                 "DF_ClimCalc.TA_HD",
-    #                 "DF_ClimCalc.HDD",
-    #                 "DF_ClimCalc.RHDD",
-    #                 "DF_ClimCalc.CT",
-    #                 "DF_ClimCalc.G_Hor",
-    #                 "DF_ClimCalc.G_Hor_HD",
-    #                 "DF_ClimCalc.G_E_HD",
-    #                 "DF_ClimCalc.G_S_HD", 
-    #                 "DF_ClimCalc.G_W_HD", 
-    #                 "DF_ClimCalc.G_N_HD"
-    #               )],
-    #             DF_ClimCalc_2 () [
-    #               13,
-    #               c (
-    #                 "DF_ClimCalc.D",
-    #                 "DF_ClimCalc.TA",
-    #                 "DF_ClimCalc.HD",
-    #                 "DF_ClimCalc.TA_HD",
-    #                 "DF_ClimCalc.HDD",
-    #                 "DF_ClimCalc.RHDD",
-    #                 "DF_ClimCalc.CT",
-    #                 "DF_ClimCalc.G_Hor",
-    #                 "DF_ClimCalc.G_Hor_HD",
-    #                 "DF_ClimCalc.G_E_HD",
-    #                 "DF_ClimCalc.G_S_HD", 
-    #                 "DF_ClimCalc.G_W_HD", 
-    #                 "DF_ClimCalc.G_N_HD"
-    #               )]
-    #           ),
-    #           myRowNames = c ("Klima 1", "Klima 2"),
-    #           myColNames = c ("D", "TA", "HD", "TA_HD", "HDD", "RHDD","CT",
-    #             "G_Hor","G_Hor_HD","G_E_HD","G_S_HD", "G_W_HD", "G_N_HD"),
-    #           myDigits   = c (  1,    2,    1,       2,     1,      1,   2,
-    #                   0, 0, 0, 0, 0, 0)
-    #         )
-    #       )
-    #     )
-    #   },
-    #   rownames = TRUE,
-    #   align = "r",
-    #   bordered = TRUE,
-    #   striped = TRUE,
-    #   spacing = "xs"
-    #   # width = "2000px"
-    #   # digits = 0 # wirkt sich auf alle aus
-    #   # digits = c (0, 0, 0, 1, 1, 1, 2) # keine Auswirkung
-    #   )
-    # 
-    
+
     output$Table_HDD_Compact_1 <-
       renderTable ({
-        Format_DataFrameForOutput(
+        Format_DataFrameForOutput (
           DF_ClimCalc_1 () [
             c(1:13),
             c (
@@ -1786,7 +1769,7 @@ server <- function (input, output, session) {
     
     output$Table_HDD_Compact_2 <-
       renderTable ({
-        Format_DataFrameForOutput(
+        Format_DataFrameForOutput (
           DF_ClimCalc_2 () [
             c(1:13),
             c (
@@ -1810,9 +1793,9 @@ server <- function (input, output, session) {
       # digits = c (0, 0, 0, 1, 1, 1, 2) # keine Auswirkung
       )
 
+    
     ## Plot chart 
 
-    
     y_Lim_Temperature <- reactive ({
       c (
         round (
@@ -2249,61 +2232,21 @@ server <- function (input, output, session) {
         "ResultTable_Year" = ResultTable_Year (),
         
         "DF_ClimCalc_1"    = DF_ClimCalc_1 (),
-          # RemoveStringFromDFColNames (
-          #   DF_ClimCalc_1 (),
-          #   "DF_ClimCalc."
-          # ),
-        
-        # "DF_ClimCalc_1"    = 
-        #   t (
-        #     Format_DataFrameForOutput (
-        #       myDataFrame = DF_ClimCalc_1 (),
-        #       myColNames = 
-        #         gsub (
-        #           pattern = "DF_ClimCalc.", 
-        #           replacement = "",
-        #           x = colnames (DF_ClimCalc_1 ())
-        #         )
-        #     )
-        #   ),
-        
+
         "DF_ClimCalc_2"    = DF_ClimCalc_2 (), 
-          # RemoveStringFromDFColNames (
-          #   DF_ClimCalc_2 (),
-          #   "DF_ClimCalc."
-          # ),
-        
+
         "DF_ClimCalc_Both" = DF_ClimCalc_Both (),
         
         "DF_Evaluation_1"  = DF_Evaluation_1 (),
-          # RemoveStringFromDFColNames (
-          #     DF_Evaluation_1 (),
-          #     "DF_Evaluation."
-          #   ),
-        
+
         "DF_Evaluation_2"  = DF_Evaluation_2 (),
-          # RemoveStringFromDFColNames (
-          #   DF_Evaluation_2 (),
-          #   "DF_Evaluation."
-          # )
-        
+
         # "Data.TA.HD"  = clidamonger::data.ta.hd
+        # Doesn't work, too large?
         
       )
     })
     
-    # Table of selected dataset ----
-    # output$myTable <- DT::renderDataTable  ({
-    #   if (input$TransposeOutputTable == TRUE) {
-    #     t (myOutputDataframe ()) 
-    #   } else {
-    #     myOutputDataframe ()
-    #   }
-    # },
-    # fill = FALSE,
-    # width = "100%",
-    # height = 1000 # "auto"
-    # )
     
     output$myTable <- 
       DT::renderDataTable  ({
@@ -2323,26 +2266,9 @@ server <- function (input, output, session) {
             paging = T
             )
       )
-    
-    
-    
-    # output$myTable <- renderTable ({
-    #   if (input$TransposeOutputTable == TRUE) {
-    #       t (myOutputDataframe ()) 
-    #     } else {
-    #       myOutputDataframe ()
-    #     }
-    #   },
-    #   rownames = TRUE,
-    #   align = "r",
-    #   bordered = TRUE,
-    #   striped = TRUE,
-    #   spacing = "xs",
-    #   hover = TRUE
-    #   )
-    
-    
+
     # Downloadable csv of selected dataset ----
+    # Not used any more, DT::renderDataTable works better. 
     output$downloadData <- 
       downloadHandler (
         filename = function () {
@@ -2363,15 +2289,23 @@ server <- function (input, output, session) {
         }
       )
     
-    
-    
+
     
     } # End Server function
 
 
-shinyApp (ui = ui, server = server)
+  shinyApp (ui = ui, server = server)
+
+    
+} # End definition of function CliDaMonDisplay ()
 
 
+
+CliDaMonDisplay (
+  Year_SelectionList_Last = 2023,
+  Year_Selected           = 2023,
+  Month_Selected          = 12
+)
 
 
 
