@@ -12,8 +12,8 @@
 ##
 #####################################################################################X
 
-# devtools::install_github ("TobiasLoga/CliDaMon")
-# devtools::install_github ("TobiasLoga/AuxFunctions")
+devtools::install_github ("TobiasLoga/CliDaMon")
+devtools::install_github ("TobiasLoga/AuxFunctions")
 
 library (shiny)
 library (shinydashboard)
