@@ -12,8 +12,8 @@
 ##
 #####################################################################################X
 
-devtools::install_github ("TobiasLoga/CliDaMon")
-devtools::install_github ("TobiasLoga/AuxFunctions")
+# devtools::install_github ("TobiasLoga/CliDaMon")
+# devtools::install_github ("TobiasLoga/AuxFunctions")
 
 library (shiny)
 library (shinydashboard)
@@ -137,6 +137,17 @@ CalculateClimate <- function (
     Index_InputVersion = 1
 ) {
 
+  Temperature_HDD_Base_1 <- as.numeric (input$Temperature_HDD_Base_1)
+  Temperature_HDD_Base_2 <- as.numeric (input$Temperature_HDD_Base_2)
+
+  Temperature_HDD_Room_1 <- as.numeric (input$Temperature_HDD_Room_1)
+  Temperature_HDD_Room_2 <- as.numeric (input$Temperature_HDD_Room_2)
+  
+  if (input$ShowInput_BaseTemp_RoomTemp_2 == FALSE) {
+    Temperature_HDD_Base_2 <- Temperature_HDD_Base_1
+    Temperature_HDD_Room_2 <- Temperature_HDD_Room_1
+  }
+  
   PostCode_1            <- input$PostCode_1
   PostCode_2            <- input$PostCode_2
   Code_ClimateStation_1 <- input$Code_ClimateStation_1
@@ -186,26 +197,26 @@ CalculateClimate <- function (
   
   if (Index_InputVersion == 2) {
     
-    Code_Type_Location  <- input$Code_Type_LocationBuilding_2
-    PostCode            <- PostCode_2
-    Code_ClimateStation <- Code_ClimateStation_2
-    Year_Start          <- Year_Start_2
-    Month_Start         <- Month_Start_2
-    n_Year              <- n_Year_2
-    Temperature_HDD_Base     <- as.numeric (input$Temperature_HDD_Base_2)
-    Temperature_HDD_Room     <- as.numeric (input$Temperature_HDD_Room_2)
+    Code_Type_Location     <- input$Code_Type_LocationBuilding_2
+    PostCode               <- PostCode_2
+    Code_ClimateStation    <- Code_ClimateStation_2
+    Year_Start             <- Year_Start_2
+    Month_Start            <- Month_Start_2
+    n_Year                 <- n_Year_2
+    Temperature_HDD_Base   <- Temperature_HDD_Base_2
+    Temperature_HDD_Room   <- Temperature_HDD_Room_2
     #Degree_Inclination_Solar <- as.numeric (input$Degree_Inclination_Solar_2)
     
   } else {
     
-    Code_Type_Location  <- input$Code_Type_LocationBuilding_1
-    PostCode            <- PostCode_1
-    Code_ClimateStation <- Code_ClimateStation_1
-    Year_Start          <- Year_Start_1
-    Month_Start         <- Month_Start_1
-    n_Year              <- n_Year_1
-    Temperature_HDD_Base     <- as.numeric (input$Temperature_HDD_Base_1)
-    Temperature_HDD_Room     <- as.numeric (input$Temperature_HDD_Room_1)
+    Code_Type_Location     <- input$Code_Type_LocationBuilding_1
+    PostCode               <- PostCode_1
+    Code_ClimateStation    <- Code_ClimateStation_1
+    Year_Start             <- Year_Start_1
+    Month_Start            <- Month_Start_1
+    n_Year                 <- n_Year_1
+    Temperature_HDD_Base   <- Temperature_HDD_Base_1
+    Temperature_HDD_Room   <- Temperature_HDD_Room_1
     #Degree_Inclination_Solar <- as.numeric (input$Degree_Inclination_Solar_1)
     
   }
@@ -1642,17 +1653,23 @@ server <- function (input, output, session) {
 
     DF_FunctionArguments_1 <-
       reactive ({
-        as.data.frame (
-          myResultList_1 () ["DF_FunctionArguments"]
-        ) 
+        RemoveStringFromDFColNames (
+          myDataFrame = as.data.frame (
+            myResultList_1 () ["DF_FunctionArguments"]
+            ),
+          myStringToRemove = "DF_FunctionArguments."
+        )
       })
 
     
     DF_FunctionArguments_2 <-
       reactive ({
-        as.data.frame (
-          myResultList_2 () ["DF_FunctionArguments"]
-        ) 
+        RemoveStringFromDFColNames (
+          myDataFrame = as.data.frame (
+            myResultList_2 () ["DF_FunctionArguments"]
+          ),
+          myStringToRemove = "DF_FunctionArguments."
+        )
       })
 
   
@@ -2162,7 +2179,8 @@ server <- function (input, output, session) {
           mapping =
             ggplot2::aes (
               x = c(1:12),
-              y = as.numeric (input$Temperature_HDD_Base_1)  
+              y = as.numeric (DF_FunctionArguments_1 () [1, "Temperature_HDD_Base"])  
+              #y = as.numeric (input$Temperature_HDD_Base_1)  
             ),
           colour = 'red', 
           linewidth = 1.0, 
@@ -2176,9 +2194,11 @@ server <- function (input, output, session) {
               x = c(1:12),
               y = as.numeric (
                 if (input$Code_Type_DegreeDays == "RHDD") {
-                  input$Temperature_HDD_Room_1  
+                  as.numeric (DF_FunctionArguments_1 () [1, "Temperature_HDD_Room"])  
+                  #input$Temperature_HDD_Room_1  
                 } else {
-                  input$Temperature_HDD_Base_1
+                  as.numeric (DF_FunctionArguments_1 () [1, "Temperature_HDD_Base"])
+                  #input$Temperature_HDD_Base_1
                 }
                 )  
             ),
@@ -2219,9 +2239,11 @@ server <- function (input, output, session) {
                 as.numeric (DF_ClimCalc_1     () [1:12, "TA_HD"]) ,
                 rep (as.numeric (
                   if (input$Code_Type_DegreeDays == "RHDD") {
-                    input$Temperature_HDD_Room_1  
+                    as.numeric (DF_FunctionArguments_1 () [1, "Temperature_HDD_Room"])
+                    #input$Temperature_HDD_Room_1  
                   } else {
-                    input$Temperature_HDD_Base_1
+                    as.numeric (DF_FunctionArguments_1 () [1, "Temperature_HDD_Base"])
+                    #input$Temperature_HDD_Base_1
                   }
                 ), 12)
               ),
@@ -2273,7 +2295,8 @@ server <- function (input, output, session) {
           mapping =
             ggplot2::aes (
               x = c(1:12),
-              y = as.numeric (input$Temperature_HDD_Base_2)  
+              y = as.numeric (DF_FunctionArguments_2 () [1, "Temperature_HDD_Base"])
+              #y = as.numeric (input$Temperature_HDD_Base_2)  
             ),
           colour = 'red', linewidth = 1.0, linetype = "dashed", na.rm = TRUE) + 
         ggplot2::geom_line (
@@ -2282,9 +2305,11 @@ server <- function (input, output, session) {
               x = c(1:12),
               y = as.numeric (
                 if (input$Code_Type_DegreeDays == "RHDD") {
-                  input$Temperature_HDD_Room_2  
+                  as.numeric (DF_FunctionArguments_2 () [1, "Temperature_HDD_Room"])
+                  #input$Temperature_HDD_Room_2  
                 } else {
-                  input$Temperature_HDD_Base_2
+                  as.numeric (DF_FunctionArguments_2 () [1, "Temperature_HDD_Base"])
+                  #input$Temperature_HDD_Base_2
                 }
                 )  
             ),
@@ -2311,9 +2336,11 @@ server <- function (input, output, session) {
                 as.numeric (DF_ClimCalc_2     () [1:12, "TA_HD"]) ,
                 rep (as.numeric (
                   if (input$Code_Type_DegreeDays == "RHDD") {
-                    input$Temperature_HDD_Room_2  
+                    as.numeric (DF_FunctionArguments_2 () [1, "Temperature_HDD_Room"])
+                    #input$Temperature_HDD_Room_2  
                   } else {
-                    input$Temperature_HDD_Base_2
+                    as.numeric (DF_FunctionArguments_2 () [1, "Temperature_HDD_Base"])
+                    #input$Temperature_HDD_Base_2
                   }
                 ), 12)
               ),
