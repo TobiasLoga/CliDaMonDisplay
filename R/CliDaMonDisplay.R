@@ -381,10 +381,10 @@ ui <- shinydashboard::dashboardPage (
         # h2 ("Information"),
         
         
+        # Comment Tobias: I did not manage to source the file "info.Rmd" in 
+        # shinyapps.io; see commented script below the text. Any suggestions are welcome :)  
+        
         markdown (
-          # Comment Tobias: I did not manage to source the file "info.Rmd" in 
-          # shinyapps.io; see commented script below the text. Any suggestions are welcome :)  
-          
           
 "## IWU - Gradtagzahlen Deutschland - Shiny App
 Version: 01.03.2024
@@ -392,6 +392,16 @@ Version: 01.03.2024
 ## Erläuterungen 
 
 Diese Shiny-App dient der Ermittlung von Monatswerten für Klimadaten, die in der energetischen Bilanzierung und bei der Klimabereinigung verwendet werden können. Sie umfasst einen Teil der Funktionalität des Excel-Tools 'Gradtagzahlen-Deutschland.xlsx'. Das Tool wurde im Kontext des Forschungsprojektes MOBASY erstellt. 
+
+Als Quelle für die Klimadaten werden folgende Daten des Deutschen Wetterdienstes DWD verwendet: 
+
+- Tagesmittel der Außentemperatur für über 800 DWD-Klimstationen (https://opendata.dwd.de/) 
+
+- Monatswerte für die Globalstrahlung auf horizontale Flächen (https://cmsaf.eu)
+
+
+Diese DWD-Daten wurden zu Monatsdaten an Heiztagen weitererarbeitet, zusätzlich wurden mit Hilfe von Schätzfunktionen  Monatswerte der Globalstrahlung (Summe Monat und an Heiztagen im Monat) für unterschiedliche Orientierungen ermittelt. Die so weiterverarbeiteten Daten stehen im R-Datenpaket clidamonger auf CRAN zur Verfügung. Dieses Paket wird von dem vorliegenden Tool genutzt. 
+
 
 Wir stellen das Werkzeug gerne anderen Experten zur Nutzung Verfügung, können jedoch keinerlei Support übernehmen. Wir übernehmen keine Gewähr für die Vollständigkeit, Richtigkeit und Genauigkeit der Berechnungen und der Daten. Fehler können gemeldet werden an: Tobias Loga t.loga@iwu.de
 
@@ -443,15 +453,36 @@ Im Folgenden sind Anhaltswerte für die Heizgrenztemperatur genannt:
 
 Diese Heizgrenztemperaturen gelten für Standardansätze des Klimas und der Nutzung (z.B. Raumtemperatur 20°C). Die tatsächliche Heizgrenztemperatur eines Gebäudes kann jedoch deutlich davon abweichen. Gegenüber den genannten Zahlenwerten erhöhte Werte können sich beispielsweise bei höheren Raumtemperaturen oder bei starker Verschattung der Fenster ergeben. 		
 
-23-02-2024
+Quelle für die Temperaturdaten						
+						
+	DWD - Deutscher Wetterdienst					
+	www.dwd.de					
+	CDC (Climate Data Center) DE					
+	https://opendata.dwd.de/climate_environment/CDC/observations_germany/climate/daily/kl/historical/					
+	Data base: 		Daily temperatures			
+	Variable:		TMK			
+	Data period evaluated:		from	01.01.1991	to	31.12.2024
+	Data download / update:		11.01.2024	(historical data)		
+			11.01.2024	(recent data)		
+						
+Quelle für die Solarstrahlungsdaten						
+						
+	DWD - Deutsche Wetterdienst					
+	EUMETSAT  / Satellite Application Facility on Climate Monitoring (CM SAF)					
+	www.cmsaf.eu					
+	Variable:		SIS			
+	Data period evaluated:		from	01.01.1991	to	31.12.2023
+	Data download / update:		23.01.2024	
+
+
+01.03.2024
 
 Institut Wohnen und Umwelt GmbH
 
 Tobias Loga 									
 
 www.iwu.de 
-
-          
+         
           
 ")
         
