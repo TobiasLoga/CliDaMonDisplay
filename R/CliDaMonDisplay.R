@@ -8,12 +8,9 @@
 ##                      IWU - Institut Wohnen und Umwelt, Darmstadt / Germany
 ##
 ##    Created:          22-04-2022
-##    Last changes:     23-02-2024
+##    Last changes:     01-03-2024
 ##
 #####################################################################################X
-
-
-
 
 devtools::install_github ("TobiasLoga/CliDaMon")
 devtools::install_github ("TobiasLoga/AuxFunctions")
@@ -27,8 +24,26 @@ library (CliDaMon)
 library (AuxFunctions)
 
 
-#######################################################################X
-## Functions -----      
+#_-----
+
+#####################################################################################X
+## Parameters -----      
+#####################################################################################X
+
+
+
+Year_SelectionList_Last  <- 2023
+Year_SelectionList_First <- 1995
+Year_Selected            <- 2023
+Month_Selected           <- 12
+
+
+
+#_-----
+
+#####################################################################################X
+## Auxiliary functions -----      
+#####################################################################################X
 
 
 DataFrame_FixRows <- function (
@@ -41,6 +56,7 @@ DataFrame_FixRows <- function (
   return (myDataFrame)
   
 }
+
 
 Format_DataFrameForOutput <- function (
   myDataFrame,
@@ -229,7 +245,7 @@ CalculateClimate <- function (
 #####################################################################################X
 ## FUNCTION / SHINY APP "ClimateByMonthDisplay ()" -----
 #####################################################################################X
-
+# This function is not working with shinyapps.io, therfore disabled 
 
 #' @title Shiny App for calculating and displaying monthly climate data - heating degree days and solar radiation by postcode
 #'
@@ -277,24 +293,28 @@ CalculateClimate <- function (
 #'    Month_Selected          = 12
 #'    )
 #'
-#' @export
-CliDaMonDisplay <- function (
-    Year_SelectionList_Last  = 2023,
-    Year_SelectionList_First = 1995,
-    Year_Selected  = 2023,
-    Month_Selected = 12
-) {
-  
+
+# #' @export
+# CliDaMonDisplay <- function (
+#     Year_SelectionList_Last  = 2023,
+#     Year_SelectionList_First = 1995,
+#     Year_Selected  = 2023,
+#     Month_Selected = 12
+# ) {
+# 
 
 
 
-#######################################################################X
-## User Interface -----
+#_ -----
+
+
+#####################################################################################X
+## USER INTERFACE -----
+#####################################################################################X
 
 
 ui <- shinydashboard::dashboardPage (
 
-  #library (shinydashboard),
   
   shinydashboard::dashboardHeader (
     title = "IWU - Gradtagzahlen"
@@ -330,7 +350,6 @@ ui <- shinydashboard::dashboardPage (
     
   ), # End dashboardSidebar 
   
-  #_ -----
   
   
   #######################################################################X
@@ -350,28 +369,90 @@ ui <- shinydashboard::dashboardPage (
         
         # h2 ("Information"),
         
-        includeMarkdown ("info/info.Rmd")
-        #includeHTML ("info.html")
+        
+        markdown (
+          # Comment Tobias: I did not manage to source the file "info.Rmd" in 
+          # shinyapps.io; see commented script below the text. Any suggestions are welcome :)  
+          
+          
+"## IWU - Gradtagzahlen Deutschland - Shiny App
+Version: 01.03.2024
+
+## Erläuterungen 
+
+Diese Shiny-App dient der Ermittlung von Monatswerten für Klimadaten, die in der energetischen Bilanzierung und bei der Klimabereinigung verwendet werden können. Sie umfasst einen Teil der Funktionalität des Excel-Tools 'Gradtagzahlen-Deutschland.xlsx'. Das Tool wurde im Kontext des Forschungsprojektes MOBASY erstellt. 
+
+Wir stellen das Werkzeug gerne anderen Experten zur Nutzung Verfügung, können jedoch keinerlei Support übernehmen. Wir übernehmen keine Gewähr für die Vollständigkeit, Richtigkeit und Genauigkeit der Berechnungen und der Daten. Fehler können gemeldet werden an: Tobias Loga t.loga@iwu.de
+
+
+### Erläuterung der Variablen 
+
+- **D [d] Tage (days)** <br>
+   Länge der betrachteten Periode
+
+- **TA [°C] Außenlufttemperatur (air temperature)**
+
+- **HD [d] Heiztage (heating days)**  <br>
+   Heiztage sind Tage an denen die über den Tag gemittelte Außenlufttemperatur unter der Heizgrenztemperatur liegt.
+
+- **HDD [Kd] Heizgradtage (heating degree days)** <br>
+   Zur Ermittlung der Heizgradtage eines Monats werden die an Heiztagen auftretenden Differenzen zwischen der Heizgrenztemperatur und dem Tagesmittel der Außenlufttemperatur erfasst und aufsummiert.
+
+- **RHDD [Kd] Gradtagzahlen	(room heating degree days)** <br>
+   Zur Ermittlung der Gradtagszahl eines Monats werden die an Heiztagen auftretenden Differenzen zwischen der Raumtemperatur und dem Tagesmittel der Außenlufttemperatur erfasst und aufsummiert.
+
+- **CT [-] Indikator für die Vollständigkeit (completeness indicator)** <br>
+   Der Indikator kann im Prinzip Werte zwischen 0,00 und 1,00 annehmen. Ein Wert von 0,95 bedeutet beispielsweise, dass für 5% des Zeitraums keine Messdaten für die Außentemperatur vorliegen (Messdatenausfälle der Wetter-Stationen). 
+
+- **G_Hor, G_E, G_S, G_W, G_N [kWh] Globalstrahlung auf unterschiedliche Orientierungen** <br>
+   Monatswerte bzw. Jahreswerte Globalstrahlung; Orientierung der Flächen horizontal sowie vertikal Ost, Süd, West, Nord
+
+- **G_Hor_HD, G_E_HD, G_S_HD, G_W_HD, G_N_HD [kWh] Globalstrahlung an Heiztagen** <br>
+  Monatswerte bzw. Jahreswerte Globalstrahlung an Heiztagen; Orientierung der Flächen horizontal sowie vertikal Ost, Süd, West, Nord
+
+
+### Gradtagzahl oder Heizgradtage - Welchen Wert wofür verwenden?										
+
+Die Gradtagzahl ist die richtige Eingangsgröße für eine Energiebilanzrechnung, bei der innerhalb der Heizperiode solare und interne Gewinne mit berücksichtigt werden, wodurch sich der Wärmebedarf entsprechend reduziert.										
+Heizgradtage sind der geeignete Vergleichswert um für gemessene Verbräuche eine Klimabereinigung vorzunehmen. Dabei wird der Verbrauchswert durch die entsprechenden Heizgradtage geteilt, woduch sich ein Wärmebedarf pro Temperaturdifferenz ergibt. Durch den Vergleich dieser Werte für mehrere Heizperioden lässt sich feststellen, ob sich ein Verbrauchswert klimabereinigt vermindert oder erhöht hat.
+
+
+### Welches Gebäude hat welche Heizgrenze?										
+
+Je besser der Wärmeschutz eines Gebäudes ist, um so niedriger liegt die Heizgrenztemperatur. 								
+
+Im Folgenden sind Anhaltswerte für die Heizgrenztemperatur genannt:			
+
+|  Baustandard	         | Heizgrenze |
+|  --------------------- | ---------- |
+|  Bestandsgebäude	     |   15,0 °C  |								
+|  Niedrigenergiehäuser	 |   12,0 °C	|					
+|  Passivhäuser	         |   10,0 °C  |						
+
+
+Diese Heizgrenztemperaturen gelten für Standardansätze des Klimas und der Nutzung (z.B. Raumtemperatur 20°C). Die tatsächliche Heizgrenztemperatur eines Gebäudes kann jedoch deutlich davon abweichen. Gegenüber den genannten Zahlenwerten erhöhte Werte können sich beispielsweise bei höheren Raumtemperaturen oder bei starker Verschattung der Fenster ergeben. 		
+
+23-02-2024
+
+Institut Wohnen und Umwelt GmbH
+
+Tobias Loga 									
+
+www.iwu.de 
+
+          
+          
+")
+        
+
         #includeMarkdown ("info/info.Rmd")
-        
-        #htmltools::includeMarkdown ("R/Info.Rmd")
-        #includeMarkdown ("Info.Rmd")
-        
-        
+        # this is working locally, but is not found after deployment 
+        # --> shinyapps.io fails to run. 
         
 
-
-
-      # source () funktioniert irgendwie nicht.  
-      # source ("R/Info.Rmd", local = knitr::knit_global())
-        
-        
-        
       ), # End tabItem "Tab_Info"
       
-      
-      
-      
+
       #######################################################################X
       ## tabItem "Tab_Dashboard"  -----
       
@@ -383,7 +464,6 @@ ui <- shinydashboard::dashboardPage (
         
         
         fluidPage (
-          
           
             # titlePanel (
             #   title = strong ("IWU - Gradtagzahlen Deutschland - Shiny App"),
@@ -425,7 +505,7 @@ ui <- shinydashboard::dashboardPage (
                       #### Eingaben "Klima 1" ----- 
                       
                       fluidRow (
-                        strong ("Klima 1")
+                        strong ("Eingaben Klima 1")
                       ),
                       
                       br (),
@@ -644,7 +724,7 @@ ui <- shinydashboard::dashboardPage (
                 #######################################################################X
                 #### Eingaben "Klima 2" ----- 
                 
-                fluidRow (strong ("Klima 2")),
+                fluidRow (strong ("Eingaben Klima 2")),
                 
                 br (),
                 
@@ -802,7 +882,7 @@ ui <- shinydashboard::dashboardPage (
                     ), 
                     style = "height:35px"
                   ),
-                  
+
                   style = "border: 1px dotted lightgrey"
                   
                 ), # End fluidRow
@@ -1090,23 +1170,79 @@ ui <- shinydashboard::dashboardPage (
                   
                 )             
                 #### END tabPanel "Einstellungen" -----
-                
-                
-                
-                
-                
+
                   )
                 
                 )        
                 
               ),
+
+              br(),
               
-              br (),
+
+              fluidRow (
+
+                br (),
+                
+                strong ("Ergebnisse"),
+                
+                br (),
+                
+                column (12,
+                  
+                    br (),
+                    strong ("Klima 1 im Verhältnis zu Klima 2"),
+
+                ),
+                
+                column (6,
+                        textOutput ("Text_Result_RHDD_HDD_Ratio1to2")
+                ),
+                column (6,
+                        textOutput ("Text_Result_G_S_HD_Ratio1to2")
+                ),
+                
+                
+                br (),
+                
+                column (12,
+                        
+                        br (),
+                        strong ("Klima 2 im Verhältnis zu Klima 1"),
+                        
+                ),
+                
+                column (6,
+                        textOutput ("Text_Result_RHDD_HDD_Ratio2to1")
+                ),
+                column (6,
+                        textOutput ("Text_Result_G_S_HD_Ratio2to1")
+                ),
+                
+                
+                
+                # fluidRow (
+                  # column (4,
+                  #         textOutput ("Text_Result_RHDD_HDD_Ratio1to2")
+                  # ),
+                  # column (4,
+                  #         textOutput ("Text_Result_G_S_HD_Ratio1to2")
+                  # ),
+                # ), # End fluidRow
+                
+                style = "background-color: white"
+                
+              ), # End fluidRow "Ergebnisse"
+              
+              
+              
+
               
               fluidRow (
                 column (
                   4,
-                  strong ("Result"),
+                  br (),
+                  strong ("Jahreswerte"),
                   tableOutput ("Table_Result_Year"),
                   #style = "height:800px;background-color: yellow",
                   
@@ -1182,6 +1318,7 @@ ui <- shinydashboard::dashboardPage (
             
           ), ### END sidebarLayout ----
           
+          
           br (),
           strong ("Klima 1 (oben) und Klima 2 (unten) / Mittel über Zeitraum"),
           tableOutput ("Table_ClimCalc_Both"),
@@ -1208,8 +1345,8 @@ ui <- shinydashboard::dashboardPage (
           tableOutput ("Table_FunctionArguments_2"),
           #tableOutput ("Table_OutputStructure_2"),
           
-          textOutput ("Text"),
-          #verbatimTextOutput ("Text")
+          textOutput ("Text_SelectedInput"),
+          #verbatimTextOutput ("Text_SelectedInput")
           
           
         )
@@ -1316,20 +1453,21 @@ ui <- shinydashboard::dashboardPage (
 #_ -----
 
 
-#######################################################################X
-## Server Function -----
+#####################################################################################X
+## SERVER FUNCTION -----
+#####################################################################################X
 
 
 server <- function (input, output, session) {
   
-  session$onSessionEnded(function() {
+  session$onSessionEnded (function() {
     stopApp()
   }) 
   # This prevents R from crashing when closing the Shiny app window.
   # The object "session" was added to the parameters of the server function. 
 
   
-  output$Text <- renderText ({
+  output$Text_SelectedInput <- renderText ({
     paste0 (
       "Eingaben: ", 
       "Art der Zuordnung Klimadaten: ", input$Code_Type_LocationBuilding_1, " / ", 
@@ -1362,7 +1500,11 @@ server <- function (input, output, session) {
   # DF_OutputStructure: a dataframe containing information about the data structure of the output 
   # (dataframe names and number of column).
 
-    
+
+  ######################################################################################X
+  ## Climate calculation
+  
+  
   myResultList_1 <- reactive ({
       CalculateClimate (
         input = input,
@@ -1513,7 +1655,10 @@ server <- function (input, output, session) {
         ) 
       })
 
-        
+  
+    ######################################################################################X
+    ## Output tables ------
+          
     DF_OutputStructure_1 <-
       reactive ({
         as.data.frame (
@@ -1799,9 +1944,83 @@ server <- function (input, output, session) {
       # digits = c (0, 0, 0, 1, 1, 1, 2) # keine Auswirkung
       )
 
+    ######################################################################################X
+    ## Output text
     
-    ## Plot chart 
+    
+    output$Text_Result_RHDD_HDD_Ratio1to2 <- renderText ({
 
+        if (input$Code_Type_DegreeDays == "RHDD") {
+          paste0 (
+            "RHDD: ",
+            round (DF_ClimCalc_1 () [13, "RHDD"], 0), " / ",  
+            round (DF_ClimCalc_2 () [13, "RHDD"], 0), " = ",
+            round (DF_ClimCalc_1 () [13, "RHDD"] / DF_ClimCalc_2 () [13, "RHDD"], 2)
+          )
+        } else {
+          paste0 (
+            "HDD: ",
+            round (DF_ClimCalc_1 () [13, "HDD"], 0), " / ",  
+            round (DF_ClimCalc_2 () [13, "HDD"], 0), " = ",
+            round (DF_ClimCalc_1 () [13, "HDD"] / DF_ClimCalc_2 () [13, "HDD"], 2)
+          )
+        } # End if else
+             
+      
+    }) # End Text_Result_RHDD_HDD_Ratio1to2'
+
+        
+    output$Text_Result_G_S_HD_Ratio1to2 <- renderText ({
+      
+      paste0 (
+        "G_S_HD: ",
+        round (DF_ClimCalc_1 () [13, "G_S_HD"], 0), " / ",  
+        round (DF_ClimCalc_2 () [13, "G_S_HD"], 0), " = ",
+        round (DF_ClimCalc_1 () [13, "G_S_HD"] / DF_ClimCalc_2 () [13, "G_S_HD"], 2)
+      ) # End paste0     
+      
+    }) # End Text_Result_G_S_HD_Ratio1to2'
+    
+    
+    output$Text_Result_RHDD_HDD_Ratio2to1 <- renderText ({
+
+        if (input$Code_Type_DegreeDays == "RHDD") {
+          paste0 (
+            "RHDD: ",
+            round (DF_ClimCalc_2 () [13, "RHDD"], 0), " / ",  
+            round (DF_ClimCalc_1 () [13, "RHDD"], 0), " = ",
+            round (DF_ClimCalc_2 () [13, "RHDD"] / DF_ClimCalc_1 () [13, "RHDD"], 2)
+          )
+        } else {
+          paste0 (
+            "RHDD: ",
+            round (DF_ClimCalc_2 () [13, "HDD"], 0), " / ",  
+            round (DF_ClimCalc_1 () [13, "HDD"], 0), " = ",
+            round (DF_ClimCalc_2 () [13, "HDD"] / DF_ClimCalc_1 () [13, "HDD"], 2)
+          )
+        } # End if else
+      
+    }) # End Text_Result_RHDD_HDD_Ratio2to1'
+    
+    
+    output$Text_Result_G_S_HD_Ratio2to1 <- renderText ({
+      
+      paste0 (
+        "G_S_HD: ",
+        round (DF_ClimCalc_2 () [13, "G_S_HD"], 0), " / ",  
+        round (DF_ClimCalc_1 () [13, "G_S_HD"], 0), " = ",
+        round (DF_ClimCalc_2 () [13, "G_S_HD"] / DF_ClimCalc_1 () [13, "G_S_HD"], 2)
+      ) # End paste0
+      
+      
+    }) # End Text_Result_G_S_HD_Ratio2to1
+    
+    
+    
+    ######################################################################################X
+    ## Plot chart -----
+
+    
     y_Lim_Temperature <- reactive ({
       c (
         round (
@@ -2299,19 +2518,29 @@ server <- function (input, output, session) {
     
     } # End Server function
 
+#####################################################################################X
+## RUN SHINYAPP
+#####################################################################################X
+
 
   shinyApp (ui = ui, server = server)
 
-    
-} # End definition of function CliDaMonDisplay ()
+
+  
+  
+  
+## Note: Function CliDaMonDisplay () is currently disabled.   
+
+        
+#} # End definition of function CliDaMonDisplay ()
 
 
 
-CliDaMonDisplay (
-  Year_SelectionList_Last = 2023,
-  Year_Selected           = 2023,
-  Month_Selected          = 12
-)
+# CliDaMonDisplay (
+#   Year_SelectionList_Last = 2023,
+#   Year_Selected           = 2023,
+#   Month_Selected          = 12
+# )
 
 
 
