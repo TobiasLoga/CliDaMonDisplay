@@ -27,7 +27,7 @@ library (AuxFunctions)
 #_-----
 
 #####################################################################################X
-## Parameters -----      
+## Constants -----      
 #####################################################################################X
 
 
@@ -37,6 +37,8 @@ Year_SelectionList_First <- 1995
 Year_Selected            <- 2023
 Month_Selected           <- 12
 
+List_ClimCalc_ColNames   <-
+  c ('Month', 'D', 'TA', 'TA_HD', 'HD', 'HDD', 'RHDD', 'CT', 'G_Hor', 'G_E', 'G_E_Inclined', 'G_SE', 'G_SE_Inclined', 'G_S', 'G_S_Inclined', 'G_SW', 'G_SW_Inclined', 'G_W', 'G_W_Inclined', 'G_NW', 'G_NW_Inclined', 'G_N', 'G_N_Inclined', 'G_NE', 'G_NE_Inclined', 'G_Hor_HD', 'G_E_HD', 'G_E_Inclined_HD', 'G_SE_HD', 'G_SE_Inclined_HD', 'G_S_HD', 'G_S_Inclined_HD', 'G_SW_HD', 'G_SW_Inclined_HD', 'G_W_HD', 'G_W_Inclined_HD', 'G_NW_HD', 'G_NW_Inclined_HD', 'G_N_HD', 'G_N_Inclined_HD', 'G_NE_HD', 'G_NE_Inclined_HD')
 
 
 #_-----
@@ -1150,11 +1152,115 @@ www.iwu.de
                         ),
                         style = "height:25px"
                       )
+                      
+                    )
+                    
+                  ), # End fluidRow
+                  
+                  fluidRow (
+                    
+                    column (12, 
+                            
+                            column (12,
+                                    checkboxInput (
+                                      inputId =  "ShowPlot_Flex",
+                                      label = "Flexibel (Auswahl Variablen unten)",
+                                      value = TRUE,
+                                      width = NULL
+                                    ),
+                                    style = "height:25px"
+                            )
+                    )
+                    
+                  ),
+                  
+                  
+                  br (),
+                  
+                  strong ("Flexibles Diagramm"),
+                  
+                  fluidRow (
+                    column (2,
+                            "Klima"
                     ),
+                    column (10,
+                            "Variable")
+                  ),
+                  
+                  fluidRow (
+                    
+                    column (2,
+                            "1"
+                    ),
+                    
+                    column (10,
+                            selectInput (
+                              inputId = "ColName_FlexChart_1",
+                              label = NULL,
+                              # label   = "Jahr",
+                              choices = List_ClimCalc_ColNames,
+                              selected = "G_S_HD",
+                              width = 600
+                            ), 
+                            style = "height:35px"
+                    ),
+                    
+                    #style = "border: 1px dotted lightgrey"
                     
                   ), # End fluidRow
                   
                   
+                  
+                  fluidRow (
+                    
+                    column (2,
+                            "2"
+                    ),
+                    
+                    column (10,
+                            selectInput (
+                              inputId = "ColName_FlexChart_2",
+                              label = NULL,
+                              # label   = "Jahr",
+                              choices = List_ClimCalc_ColNames,
+                              selected = "G_S_HD",
+                              width = 600
+                            ), 
+                            style = "height:35px"
+                    ),
+                    
+                    #style = "border: 1px dotted lightgrey"
+                    
+                  ), # End fluidRow
+                  
+                  
+                  fluidRow (
+                    
+                    column (6,
+                            
+                            "Offset Legende (Monate)"
+                            
+                            ),
+                    
+                    
+                    column (6,
+                      numericInput (
+                        inputId = "OffsetMonths_FlexChart", 
+                        label = NULL,
+                        value = 7,
+                        min = 0,
+                        max = 12,
+                        width = 200
+                      ), 
+                      style = "height:35px"
+                    ),
+                    
+                      
+                    #)
+                    
+                    
+                    
+                  ),
                   
                   
                   br (),
@@ -1207,8 +1313,9 @@ www.iwu.de
                   ),
                   
                   
+                  br ()
                   
-                  
+
                   
                 )             
                 #### END tabPanel "Einstellungen" -----
@@ -1354,7 +1461,23 @@ www.iwu.de
                 "Heiztage",
                 plotOutput (outputId = "Plot_HeatingDays",                   
                             height = "200px"),
+                
               ), # End conditionalPanel
+              
+              
+              conditionalPanel (
+
+                "input.ShowPlot_Flex",
+                
+                "Flexibler Plot: ausgewählte Größen",
+                plotOutput (outputId = "Plot_Flex",                   
+                            height = "200px"),
+              
+                ) # End conditionalPanel
+              
+              
+              
+              
               
             ) #### END mainPanel ----
             
@@ -1591,6 +1714,11 @@ server <- function (input, output, session) {
     })
   
   
+  # List_ClimCalc_ColNames <-
+  #   reactive ({
+  #     colnames (DF_ClimCalc_1)
+  #   })
+  
   DF_ClimCalc_2 <-
     reactive ({
       RemoveStringFromDFColNames (
@@ -1599,8 +1727,6 @@ server <- function (input, output, session) {
         myStringToRemove = "DF_ClimCalc."
       )
     })
-  
-  
   
   
   DF_ClimCalc_Both <-
@@ -1635,7 +1761,29 @@ server <- function (input, output, session) {
       )
     })
 
-    
+
+  DF_FlexChart <-
+    reactive ({
+      data.frame (
+        "Index" = c (1:24),
+        "Month" = as.character (
+          c (
+            DF_ClimCalc_1 () [c(1:12), "Month"], 
+            DF_ClimCalc_2 () [c(1:12), "Month"])),
+        "Analysis" = c (
+          rep ( paste0 (input$ColName_FlexChart_1, "_Climate1"), 12), 
+          rep ( paste0 (input$ColName_FlexChart_2, "_Climate2"), 12)
+        ),
+        "Value" = c (
+          as.numeric (DF_ClimCalc_1 () [c(1:12), input$ColName_FlexChart_1]) ,
+          as.numeric (DF_ClimCalc_2 () [c(1:12), input$ColName_FlexChart_2])
+        )
+      )
+    })
+  
+  
+  
+      
     DF_Evaluation_1 <-
       reactive ({
         RemoveStringFromDFColNames (
@@ -2501,6 +2649,43 @@ server <- function (input, output, session) {
 
       }) # End render plot
 
+    
+    
+    output$Plot_Flex <- renderPlot ({
+      
+      ggplot2::ggplot () +
+        ggplot2::theme_light () +
+        ggplot2::geom_col (
+          data = DF_FlexChart () ,
+          mapping = ggplot2::aes (
+            x = Month,
+            y = Value,
+            fill = Analysis,
+            group = Analysis
+          ),
+          position = "dodge",
+          width = 0.5, 
+          na.rm = TRUE,
+          show.legend = TRUE
+        ) + 
+        ggplot2::scale_x_discrete (
+          name = "Monat",
+          limits = factor (DF_ClimCalc_1 () [1:12, "Month"]),
+          labels = DF_ClimCalc_1 () [1:12, "Month"]) +
+        ggplot2::ylab ("Einheit siehe Variablendefinition") +
+        ggplot2::scale_fill_brewer (palette = "Paired") +
+        ggplot2::theme (legend.position = c (
+          0.07 + 0.93 *
+            (( (as.numeric (input$OffsetMonths_FlexChart) - 
+         as.numeric (DF_ClimCalc_1 () [1, "Month"])) / 12) %% 1), 
+          0.8
+        )) +
+        ggplot2::theme (legend.title = ggplot2::element_blank ())
+      # ggplot2::theme (legend.position = c(0.07, 0.7))
+      #+
+      #ggplot2::theme (legend.position = "bottom")
+      
+    })
     
     
     #######################################################################X
