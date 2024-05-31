@@ -12,16 +12,30 @@
 ##
 #####################################################################################X
 
-devtools::install_github ("TobiasLoga/CliDaMon")
-devtools::install_github ("TobiasLoga/AuxFunctions")
+
+# devtools::install_github ("TobiasLoga/AuxFunctions")
+# devtools::install_github ("TobiasLoga/CliDaMon")
+
+# renv::install (packages = "TobiasLoga/AuxFunctions")
+# renv::install (packages = "TobiasLoga/CliDaMon")
+
+# renv::init()
+# renv::status()
+# renv::install (packages = "TobiasLoga/AuxFunctions")
+# renv::snapshot()
+# renv::snapshot(packages = "TobiasLoga/AuxFunctions")
+
+# renv::update (packages = "AuxFunctions")
+# renv::update (packages = "CliDaMon") 
+
 
 library (shiny)
 library (shinydashboard)
 library (markdown)
 
 library (clidamonger)
-library (CliDaMon)
 library (AuxFunctions)
+library (CliDaMon)
 
 
 #_-----
@@ -223,11 +237,15 @@ CalculateClimate <- function (
     
   }
   
+  
   myResultList <-
     CliDaMon::ClimateByMonth (
       myClimateData_PostCodes     = as.data.frame (clidamonger::tab.stationmapping),
       myClimateData_StationTA     = as.data.frame (clidamonger::list.station.ta),
-      myClimateData_TA_HD         = as.data.frame (clidamonger::data.ta.hd),
+      myClimateData_TA_HD         = data.frame (
+        clidamonger::data.ta.hd, 
+        row.names = clidamonger::data.ta.hd$ID_Data
+        ), # 2024-05-31: Temporary solution, in the current dataframe the rownames are missing
       myClimateData_Sol           = as.data.frame (clidamonger::data.sol),
       myParTab_SolOrientEst       = as.data.frame (clidamonger::tab.estim.sol.orient),
       Indicator_Type_LocationBuilding =
@@ -306,15 +324,15 @@ CalculateClimate <- function (
 #'    Month_Selected          = 12
 #'    )
 #'
+#'
+#' #' @export
+#' CliDaMonDisplay <- function (
+#'     Year_SelectionList_Last  = 2023,
+#'     Year_SelectionList_First = 1995,
+#'     Year_Selected  = 2023,
+#'     Month_Selected = 12
+#' ) {
 
-# #' @export
-# CliDaMonDisplay <- function (
-#     Year_SelectionList_Last  = 2023,
-#     Year_SelectionList_First = 1995,
-#     Year_Selected  = 2023,
-#     Month_Selected = 12
-# ) {
-# 
 
 
 
@@ -2270,7 +2288,8 @@ server <- function (input, output, session) {
           labels = DF_ClimCalc_1 () [1:12, "Month"]) +
         ggplot2::ylab ("Temperatur [°C]") +
         ggplot2::geom_hline (yintercept=0) +
-        ggplot2::theme (legend.position = c (0.5, 0.5)) +
+        ggplot2::theme (legend.position.inside = c (0.5, 0.5)) +
+        # ggplot2::theme (legend.position = c (0.5, 0.5)) +
         #ggplot2::theme (legend.position = "bottom")
         # labs (title="Monatsmittel und Monatsmittel an Heiztagen (blau)") +
         ggplot2::coord_cartesian (ylim = y_Lim_Temperature (), expand = TRUE)
@@ -2527,7 +2546,8 @@ server <- function (input, output, session) {
             ),
           colour = 'green', linewidth = 1.0, na.rm = TRUE
           ) +
-        ggplot2::theme (legend.position = c(0.07, 0.75))
+        ggplot2::theme (legend.position.inside = c(0.07, 0.75))
+      # ggplot2::theme (legend.position = c(0.07, 0.75))
         
 
     })
@@ -2567,8 +2587,10 @@ server <- function (input, output, session) {
           labels = DF_ClimCalc_1 () [1:12, "Month"]) +
         ggplot2::ylab ("Gradtagzahl [Kd/a]") +
         ggplot2::scale_fill_brewer (palette = "Dark2") +
-        ggplot2::theme (legend.position = c (
+        ggplot2::theme (legend.position.inside = c (
           0.07 + 0.93 *
+            # ggplot2::theme (legend.position = c (
+        #   0.07 + 0.93 *
             ((as.numeric (7 - (DF_ClimCalc_1 () [1, "Month"])) / 12) %% 1), 
           0.8
           )) +
@@ -2603,8 +2625,10 @@ server <- function (input, output, session) {
           labels = DF_ClimCalc_1 () [1:12, "Month"]) +
         ggplot2::ylab ("Heizgradtage [Kd/a]") +
         ggplot2::scale_fill_brewer (palette = "Dark2") +
-        ggplot2::theme (legend.position = c (
-            0.07 + 0.93 *
+        ggplot2::theme (legend.position.inside = c (
+          0.07 + 0.93 *
+            # ggplot2::theme (legend.position = c (
+        #     0.07 + 0.93 *
               ((as.numeric (7 - (DF_ClimCalc_1 () [1, "Month"])) / 12) %% 1), 
             0.8
           )) +
@@ -2638,8 +2662,10 @@ server <- function (input, output, session) {
           labels = DF_ClimCalc_1 () [1:12, "Month"]) +
         ggplot2::ylab ("Heiztage [d]") +
         ggplot2::scale_fill_brewer (palette = "Pastel2") +
-        ggplot2::theme (legend.position = c (
-            0.07 + 0.93 *
+        ggplot2::theme (legend.position.inside = c (
+          0.07 + 0.93 *
+            # ggplot2::theme (legend.position = c (
+        #     0.07 + 0.93 *
               ((as.numeric (7 - (DF_ClimCalc_1 () [1, "Month"])) / 12) %% 1), 
             0.8
           )) +
@@ -2674,8 +2700,10 @@ server <- function (input, output, session) {
           labels = DF_ClimCalc_1 () [1:12, "Month"]) +
         ggplot2::ylab ("Einheit siehe Variablendefinition") +
         ggplot2::scale_fill_brewer (palette = "Paired") +
-        ggplot2::theme (legend.position = c (
+        ggplot2::theme (legend.position.inside = c (
           0.07 + 0.93 *
+            # ggplot2::theme (legend.position = c (
+        #   0.07 + 0.93 *
             (( (as.numeric (input$OffsetMonths_FlexChart) - 
          as.numeric (DF_ClimCalc_1 () [1, "Month"])) / 12) %% 1), 
           0.8
@@ -2774,11 +2802,13 @@ server <- function (input, output, session) {
   
 ## Note: Function CliDaMonDisplay () is currently disabled.   
 
-        
-#} # End definition of function CliDaMonDisplay ()
+#         
+# } # End definition of function CliDaMonDisplay ()
+# 
 
 
-
+  
+  
 # CliDaMonDisplay (
 #   Year_SelectionList_Last = 2023,
 #   Year_Selected           = 2023,
