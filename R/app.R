@@ -46,8 +46,8 @@ library (CliDaMon)
 
 
 
-Year_SelectionList_Last  <- 2023
-Year_SelectionList_First <- 1995
+Year_SelectionList_Last  <- 2030 # Default value, is replaced in server function 
+Year_SelectionList_First <- 1991 # Default value, is replaced in server function 
 Year_Selected            <- 2023
 Month_Selected           <- 12
 
@@ -148,6 +148,71 @@ RemoveStringFromDFColNames <- function (
 
 
 
+GetMetaInfo_Data_TA_HD <- function (
+    myClimateData_TA_HD  
+){
+  
+  i_Col_MonthData <- 
+    which (
+      substr (
+        colnames (myClimateData_TA_HD),
+        start = 1, stop = 2
+      ) == "M_"
+      & 
+        substr (
+          colnames (myClimateData_TA_HD),
+          start = 1, stop = 5
+        ) != "M_LTA"
+    )
+  
+  
+  myColNames <- colnames (myClimateData_TA_HD [i_Col_MonthData])
+  
+  i_Row_CT <- 
+    which (myClimateData_TA_HD$Code_Quantity == "CT")
+  
+  
+  MeanCompleteness <-
+    apply (
+      X = myClimateData_TA_HD [i_Row_CT, i_Col_MonthData],
+      MARGIN = 2,
+      FUN = mean, 
+      na.rm=TRUE
+    )
+  
+  MeanCompleteness [which (is.na (MeanCompleteness))] <- 0
+  
+  DF_MonthMetaInfo_TA_HD <- 
+    data.frame(
+      i_Month = 1 : length (myColNames),
+      myColNames = myColNames,
+      i_Col_MonthData = i_Col_MonthData,
+      Year = substr (myColNames, start = 3, stop = 6),
+      Month = substr (myColNames, start = 8, stop = 9),
+      MeanCompleteness = MeanCompleteness 
+    )
+  
+  i_Col_DataAvailable_Min <- 
+    min (DF_MonthMetaInfo_TA_HD$i_Month [DF_MonthMetaInfo_TA_HD$MeanCompleteness > 0.5])
+  
+  i_Col_DataAvailable_Max <- 
+    max (DF_MonthMetaInfo_TA_HD$i_Month [DF_MonthMetaInfo_TA_HD$MeanCompleteness > 0.5])
+  
+  DF_MetaInfo_TA_HD <- 
+    data.frame(
+      Year_Data_Begin  = DF_MonthMetaInfo_TA_HD$Year [i_Col_DataAvailable_Min],
+      Month_Data_Begin = DF_MonthMetaInfo_TA_HD$Month [i_Col_DataAvailable_Min],
+      Year_Data_End    = DF_MonthMetaInfo_TA_HD$Year [i_Col_DataAvailable_Max],
+      Month_Data_End   = DF_MonthMetaInfo_TA_HD$Month [i_Col_DataAvailable_Max]
+    )
+  
+  return (DF_MetaInfo_TA_HD)
+  
+}
+
+  
+  
+  
 CalculateClimate <- function (
     input,
     Index_InputVersion = 1
@@ -186,9 +251,10 @@ CalculateClimate <- function (
     Year_End_2 <- Year_End_1
   }
   
-  if (input$ShowInput_LastMonth_2 == FALSE){
-    Month_End_2 <- Month_End_1
-  }
+    Month_End_2 <- Month_End_1 # 2024-06-07 changed 
+  # if (input$ShowInput_LastMonth_2 == FALSE){
+  #   Month_End_2 <- Month_End_1
+  # }
   
   Year_Start_1 <- 
     as.numeric (Year_End_1) - 
@@ -351,6 +417,7 @@ ui <- shinydashboard::dashboardPage (
     title = "IWU - Gradtagzahlen"
   ),
   
+  
   shinydashboard::dashboardSidebar ( 
     
     #minified = FALSE, 
@@ -400,18 +467,19 @@ ui <- shinydashboard::dashboardPage (
         
         # h2 ("Information"),
         
-        
+
         # Comment Tobias: I did not manage to source the file "info.Rmd" in 
         # shinyapps.io; see commented script below the text. Any suggestions are welcome :)  
+        # Thus, I pasted the original text from "info.Rmd" into the script below.
         
         markdown (
           
 "## IWU - Gradtagzahlen Deutschland - Shiny App
-Version: 01.03.2024
+App-Version: 07.06.2024
 
 ## Erläuterungen 
 
-Diese Shiny-App dient der Ermittlung von Monatswerten für Klimadaten, die in der energetischen Bilanzierung und bei der Klimabereinigung verwendet werden können. Sie umfasst einen Teil der Funktionalität des Excel-Tools 'Gradtagzahlen-Deutschland.xlsx'. Das Tool wurde im Kontext des Forschungsprojektes MOBASY erstellt. 
+Mit dieser Shiny-App können für einen spezifischen Standort Monatswerte für Klimadaten ermittelt werden, die in der energetischen Bilanzierung und bei der Klimabereinigung verwendbar sind. Die App umfasst einen Teil der Funktionalität des Excel-Tools 'Gradtagzahlen-Deutschland.xlsx'. Das Tool wurde im Kontext des Forschungsprojektes MOBASY erstellt. 
 
 Als Quelle für die Klimadaten werden folgende Daten des Deutschen Wetterdienstes DWD verwendet: 
 
@@ -422,6 +490,7 @@ Als Quelle für die Klimadaten werden folgende Daten des Deutschen Wetterdienste
 
 Diese DWD-Daten wurden zu Monatsdaten an Heiztagen weitererarbeitet, zusätzlich wurden mit Hilfe von Schätzfunktionen  Monatswerte der Globalstrahlung (Summe Monat und an Heiztagen im Monat) für unterschiedliche Orientierungen ermittelt. Die so weiterverarbeiteten Daten stehen im R-Datenpaket clidamonger auf CRAN zur Verfügung. Dieses Paket wird von dem vorliegenden Tool genutzt. 
 
+Für die Ermittlung der Klimadaten für eine gegebene Postleitzahl wird das R-Paket CliDaMon verwendet (https://github.com/TobiasLoga/CliDaMon). Da im R-Skript die Aggregation und Mittelwertbildung etwas anders funktioniert als in dem oben erwähnten Excel-Tool 'Gradtagzahlen-Deutschland.xlsx' können die Ergebnisse leicht von einander abweichen.   
 
 Wir stellen das Werkzeug gerne anderen Experten zur Nutzung Verfügung, können jedoch keinerlei Support übernehmen. Wir übernehmen keine Gewähr für die Vollständigkeit, Richtigkeit und Genauigkeit der Berechnungen und der Daten. Fehler können gemeldet werden an: Tobias Loga t.loga@iwu.de
 
@@ -481,9 +550,7 @@ Quelle für die Temperaturdaten
 	https://opendata.dwd.de/climate_environment/CDC/observations_germany/climate/daily/kl/historical/					
 	Data base: 		Daily temperatures			
 	Variable:		TMK			
-	Data period evaluated:		from	01.01.1991	to	31.12.2024
-	Data download / update:		11.01.2024	(historical data)		
-			11.01.2024	(recent data)		
+
 						
 Quelle für die Solarstrahlungsdaten						
 						
@@ -491,11 +558,7 @@ Quelle für die Solarstrahlungsdaten
 	EUMETSAT  / Satellite Application Facility on Climate Monitoring (CM SAF)					
 	www.cmsaf.eu					
 	Variable:		SIS			
-	Data period evaluated:		from	01.01.1991	to	31.12.2023
-	Data download / update:		23.01.2024	
 
-
-01.03.2024
 
 Institut Wohnen und Umwelt GmbH
 
@@ -524,6 +587,7 @@ www.iwu.de
         
         h2 ("IWU - Gradtagzahlen Deutschland - Shiny App"),
         
+        strong (textOutput ("Text_DataRange")),
         
         fluidPage (
           
@@ -894,35 +958,35 @@ www.iwu.de
                 ), # End conditionalPanel
                 
                 
-                conditionalPanel (
-                  
-                  condition = "input.ShowInput_LastMonth_2", 
-                  
-                  fluidRow (
-                    
-                    column (
-                      7,
-                      "letzter Monat"
-                    ),
-                    
-                    column (
-                      5,
-                      selectInput (
-                        inputId = "Month_End_2",
-                        label = NULL,
-                        # label   = "letzter Monat",
-                        choices = c (1:12),
-                        selected = Month_Selected,
-                        width = 100
-                      ), 
-                      style = "height:35px"
-                    ),
-                    
-                    style = "border: 1px dotted lightgrey"
-                    
-                  ), # End fluidRow
-                  
-                ), # End conditionPanel
+                # 2024-06-07 changed 
+                # conditionalPanel (
+                #   condition = "input.ShowInput_LastMonth_2", 
+                #   
+                #   fluidRow (
+                #     
+                #     column (
+                #       7,
+                #       "letzter Monat"
+                #     ),
+                #     
+                #     column (
+                #       5,
+                #       selectInput (
+                #         inputId = "Month_End_2",
+                #         label = NULL,
+                #         # label   = "letzter Monat",
+                #         choices = c (1:12),
+                #         selected = Month_Selected,
+                #         width = 100
+                #       ), 
+                #       style = "height:35px"
+                #     ),
+                #     
+                #     style = "border: 1px dotted lightgrey"
+                #     
+                #   ), # End fluidRow
+                #   
+                # ), # End conditionPanel
                 
                 
                 fluidRow (
@@ -1308,18 +1372,18 @@ www.iwu.de
                         width = NULL
                       ),
                       style = "height:25px"
-                    ),
-                    
-                    column (
-                      8,
-                      checkboxInput (
-                        inputId =  "ShowInput_LastMonth_2",
-                        label = "letzter Monat",
-                        value = FALSE,
-                        width = NULL
-                      ),
-                      style = "height:25px"
                     )
+                    
+                    # column (
+                    #   8,
+                    #   checkboxInput (
+                    #     inputId =  "ShowInput_LastMonth_2",
+                    #     label = "letzter Monat",
+                    #     value = FALSE,
+                    #     width = NULL
+                    #   ),
+                    #   style = "height:25px"
+                    # )
                     
                   ),
                   
@@ -1643,12 +1707,132 @@ www.iwu.de
 
 server <- function (input, output, session) {
   
+  session$allowReconnect (TRUE) # 2024-06-07 supplemented
+  
   session$onSessionEnded (function() {
-    stopApp()
+    # stopApp()  # 2024-06-07 switched off for use on webserver
   }) 
   # This prevents R from crashing when closing the Shiny app window.
   # The object "session" was added to the parameters of the server function. 
 
+  
+  DF_MetaInfo_TA_HD <- reactive ({
+    GetMetaInfo_Data_TA_HD (clidamonger::data.ta.hd)
+  })
+  
+  output$Text_DataRange <- renderText ({
+    paste0 (
+      "Daten von ",
+      DF_MetaInfo_TA_HD () [1, "Month_Data_Begin"] , "/",
+      DF_MetaInfo_TA_HD () [1, "Year_Data_Begin" ] , " bis ",
+      DF_MetaInfo_TA_HD () [1, "Month_Data_End"  ] , "/",
+      DF_MetaInfo_TA_HD () [1, "Year_Data_End"   ]
+    )
+  })
+  
+  
+  ## Adapt the selection list of Year_End_1  
+  
+  observe({
+    updateSelectInput (session, "Year_End_1",
+                       choices = 
+                         DF_MetaInfo_TA_HD () [1, "Year_Data_Begin" ] : 
+                         DF_MetaInfo_TA_HD () [1, "Year_Data_End"],
+                       selected =  DF_MetaInfo_TA_HD () [1, "Year_Data_End"]
+    )
+    
+  })
+  
+  
+  ## Adapt the selection list of Month_End_1  
+  
+  observe({
+    updateSelectInput (session, "Month_End_1",
+                       choices = 
+                         DF_MetaInfo_TA_HD () [1, "Month_Data_Begin" ] : 
+                         DF_MetaInfo_TA_HD () [1, "Month_Data_End"],
+                       selected =  DF_MetaInfo_TA_HD () [1, "Month_Data_End"]
+    )
+    
+  })
+  
+  
+  ## Adapt the selection list of Year_End_2  
+  
+  observe({
+    updateSelectInput (session, "Year_End_2",
+                       choices = 
+                         DF_MetaInfo_TA_HD () [1, "Year_Data_Begin" ] : 
+                         DF_MetaInfo_TA_HD () [1, "Year_Data_End"],
+                       selected =  DF_MetaInfo_TA_HD () [1, "Year_Data_End"]
+    )
+    
+  })
+  
+  
+  ## Adapt the selection list of n_Year_1  
+  
+  observe({
+    
+    SelectedLastYear_1 <- as.numeric (input$Year_End_1)
+    
+    if (is.null (SelectedLastYear_1)) {
+      SelectedLastYear_1 <- as.numeric (DF_MetaInfo_TA_HD () [1, "Year_Data_End"])
+    }
+    
+    MaxPeriodLength <- 
+      SelectedLastYear_1 - 
+      as.numeric (DF_MetaInfo_TA_HD () [1, "Year_Data_Begin" ]) + 1
+    
+    if (is.null (MaxPeriodLength)) {
+      MaxPeriodLength <- 20
+    }
+    
+    updateSelectInput (session, "n_Year_1",
+                       choices = 1 : MaxPeriodLength,
+                       selected =  min (
+                        as.numeric (input$n_Year_1)  , 
+                        MaxPeriodLength
+                        )
+                       #selected =  min (MaxPeriodLength, 20)
+    )
+    
+  })
+  
+  
+  ## Adapt the selection list of n_Year_2  
+  
+  observe({
+    
+    SelectedLastYear_2 <- 
+      if (input$ShowInput_LastYear_2 == TRUE) {
+        as.numeric (input$Year_End_2)
+      } else {
+        as.numeric (input$Year_End_1)
+      }
+    
+    if (is.null (SelectedLastYear_2)) {
+      SelectedLastYear_2 <- as.numeric (DF_MetaInfo_TA_HD () [1, "Year_Data_End"])
+    }
+    
+    MaxPeriodLength <- 
+      SelectedLastYear_2 - 
+      as.numeric (DF_MetaInfo_TA_HD () [1, "Year_Data_Begin" ]) + 1
+    
+    if (is.null (MaxPeriodLength)) {
+      MaxPeriodLength <- 20
+    }
+    
+    updateSelectInput (session, "n_Year_2",
+                       choices = 1 : MaxPeriodLength,
+                       selected =  min (
+                         as.numeric (input$n_Year_2)  , 
+                         MaxPeriodLength
+                       )
+    )
+    
+  })
+  
   
   output$Text_SelectedInput <- renderText ({
     paste0 (
@@ -2231,6 +2415,7 @@ server <- function (input, output, session) {
     
     
     
+    
     ######################################################################################X
     ## Plot chart -----
 
@@ -2288,7 +2473,7 @@ server <- function (input, output, session) {
           labels = DF_ClimCalc_1 () [1:12, "Month"]) +
         ggplot2::ylab ("Temperatur [°C]") +
         ggplot2::geom_hline (yintercept=0) +
-        ggplot2::theme (legend.position.inside = c (0.5, 0.5)) +
+        ggplot2::theme (legend.position = c (0.5, 0.5)) +
         # ggplot2::theme (legend.position = c (0.5, 0.5)) +
         #ggplot2::theme (legend.position = "bottom")
         # labs (title="Monatsmittel und Monatsmittel an Heiztagen (blau)") +
@@ -2546,7 +2731,7 @@ server <- function (input, output, session) {
             ),
           colour = 'green', linewidth = 1.0, na.rm = TRUE
           ) +
-        ggplot2::theme (legend.position.inside = c(0.07, 0.75))
+        ggplot2::theme (legend.position = c(0.07, 0.75))
       # ggplot2::theme (legend.position = c(0.07, 0.75))
         
 
@@ -2587,11 +2772,11 @@ server <- function (input, output, session) {
           labels = DF_ClimCalc_1 () [1:12, "Month"]) +
         ggplot2::ylab ("Gradtagzahl [Kd/a]") +
         ggplot2::scale_fill_brewer (palette = "Dark2") +
-        ggplot2::theme (legend.position.inside = c (
-          0.07 + 0.93 *
-            # ggplot2::theme (legend.position = c (
-        #   0.07 + 0.93 *
-            ((as.numeric (7 - (DF_ClimCalc_1 () [1, "Month"])) / 12) %% 1), 
+        # ggplot2::theme (legend.position = c (
+        # ggplot2::theme (legend.position = c (0.5,0.5)) +
+        ggplot2::theme (legend.position = c (
+            0.07 + 0.93 *
+            ((as.numeric (7 - (DF_ClimCalc_1 () [1, "Month"])) / 12) %% 1),
           0.8
           )) +
         ggplot2::theme (legend.title = ggplot2::element_blank ())
@@ -2625,7 +2810,7 @@ server <- function (input, output, session) {
           labels = DF_ClimCalc_1 () [1:12, "Month"]) +
         ggplot2::ylab ("Heizgradtage [Kd/a]") +
         ggplot2::scale_fill_brewer (palette = "Dark2") +
-        ggplot2::theme (legend.position.inside = c (
+        ggplot2::theme (legend.position = c (
           0.07 + 0.93 *
             # ggplot2::theme (legend.position = c (
         #     0.07 + 0.93 *
@@ -2662,7 +2847,7 @@ server <- function (input, output, session) {
           labels = DF_ClimCalc_1 () [1:12, "Month"]) +
         ggplot2::ylab ("Heiztage [d]") +
         ggplot2::scale_fill_brewer (palette = "Pastel2") +
-        ggplot2::theme (legend.position.inside = c (
+        ggplot2::theme (legend.position = c (
           0.07 + 0.93 *
             # ggplot2::theme (legend.position = c (
         #     0.07 + 0.93 *
@@ -2700,7 +2885,7 @@ server <- function (input, output, session) {
           labels = DF_ClimCalc_1 () [1:12, "Month"]) +
         ggplot2::ylab ("Einheit siehe Variablendefinition") +
         ggplot2::scale_fill_brewer (palette = "Paired") +
-        ggplot2::theme (legend.position.inside = c (
+        ggplot2::theme (legend.position = c (
           0.07 + 0.93 *
             # ggplot2::theme (legend.position = c (
         #   0.07 + 0.93 *

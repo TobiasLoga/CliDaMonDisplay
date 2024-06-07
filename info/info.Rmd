@@ -1,9 +1,9 @@
 ## IWU - Gradtagzahlen Deutschland - Shiny App
-Version: 01.03.2024
+Version: 07.06.2024
 
 ## Erläuterungen 
 
-Diese Shiny-App dient der Ermittlung von Monatswerten für Klimadaten, die in der energetischen Bilanzierung und bei der Klimabereinigung verwendet werden können. Sie umfasst einen Teil der Funktionalität des Excel-Tools 'Gradtagzahlen-Deutschland.xlsx'. Das Tool wurde im Kontext des Forschungsprojektes MOBASY erstellt. 
+Mit dieser Shiny-App können für einen spezifischen Standort Monatswerte für Klimadaten ermittelt werden, die in der energetischen Bilanzierung und bei der Klimabereinigung verwendbar sind. Die App umfasst einen Teil der Funktionalität des Excel-Tools 'Gradtagzahlen-Deutschland.xlsx'. Das Tool wurde im Kontext des Forschungsprojektes MOBASY erstellt. 
 
 Als Quelle für die Klimadaten werden folgende Daten des Deutschen Wetterdienstes DWD verwendet: 
 
@@ -14,6 +14,7 @@ Als Quelle für die Klimadaten werden folgende Daten des Deutschen Wetterdienste
 
 Diese DWD-Daten wurden zu Monatsdaten an Heiztagen weitererarbeitet, zusätzlich wurden mit Hilfe von Schätzfunktionen  Monatswerte der Globalstrahlung (Summe Monat und an Heiztagen im Monat) für unterschiedliche Orientierungen ermittelt. Die so weiterverarbeiteten Daten stehen im R-Datenpaket clidamonger auf CRAN zur Verfügung. Dieses Paket wird von dem vorliegenden Tool genutzt. 
 
+Für die Ermittlung der Klimadaten für eine gegebene Postleitzahl wird das R-Paket CliDaMon verwendet (https://github.com/TobiasLoga/CliDaMon). Da im R-Skript die Aggregation und Mittelwertbildung etwas anders funktioniert als in dem oben erwähnten Excel-Tool 'Gradtagzahlen-Deutschland.xlsx' können die Ergebnisse leicht von einander abweichen.   
 
 Wir stellen das Werkzeug gerne anderen Experten zur Nutzung Verfügung, können jedoch keinerlei Support übernehmen. Wir übernehmen keine Gewähr für die Vollständigkeit, Richtigkeit und Genauigkeit der Berechnungen und der Daten. Fehler können gemeldet werden an: Tobias Loga t.loga@iwu.de
 
@@ -73,21 +74,15 @@ Quelle für die Temperaturdaten
 	https://opendata.dwd.de/climate_environment/CDC/observations_germany/climate/daily/kl/historical/					
 	Data base: 		Daily temperatures			
 	Variable:		TMK			
-	Data period evaluated:		from	01.01.1991	to	31.12.2024
-	Data download / update:		11.01.2024	(historical data)		
-			11.01.2024	(recent data)		
-						
+
+
 Quelle für die Solarstrahlungsdaten						
 						
 	DWD - Deutsche Wetterdienst					
 	EUMETSAT  / Satellite Application Facility on Climate Monitoring (CM SAF)					
 	www.cmsaf.eu					
 	Variable:		SIS			
-	Data period evaluated:		from	01.01.1991	to	31.12.2023
-	Data download / update:		23.01.2024	
 
-
-01.03.2024
 
 Institut Wohnen und Umwelt GmbH
 
