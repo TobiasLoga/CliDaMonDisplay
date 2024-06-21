@@ -23,7 +23,7 @@
     },
     "CliDaMon": {
       "Package": "CliDaMon",
-      "Version": "1.0.0",
+      "Version": "1.1.0",
       "Source": "GitHub",
       "Remotes": "TobiasLoga/AuxFunctions",
       "RemoteType": "github",
@@ -31,11 +31,11 @@
       "RemoteRepo": "CliDaMon",
       "RemoteUsername": "TobiasLoga",
       "RemoteRef": "HEAD",
-      "RemoteSha": "ba32c33bf036f6a7631817aa3c1145580c6f6ffc",
+      "RemoteSha": "126fb8ea55bd80eac408c82655baeccf484295ca",
       "Requirements": [
         "AuxFunctions"
       ],
-      "Hash": "875cdfaf2201884b79d523b8f007806b"
+      "Hash": "1980ea24cd11e62ffad683ba1d8d1431"
     },
     "DT": {
       "Package": "DT",
@@ -194,13 +194,18 @@
     },
     "clidamonger": {
       "Package": "clidamonger",
-      "Version": "1.1.0",
-      "Source": "Repository",
-      "Repository": "CRAN",
+      "Version": "1.2.0",
+      "Source": "GitHub",
+      "RemoteType": "github",
+      "RemoteHost": "api.github.com",
+      "RemoteUsername": "IWUGERMANY",
+      "RemoteRepo": "clidamonger",
+      "RemoteRef": "main",
+      "RemoteSha": "9896699aae6dd5f6c937ba5767df636bfc52f90f",
       "Requirements": [
         "R"
       ],
-      "Hash": "913cca06caa2795d3c3591aa6d8219de"
+      "Hash": "37952ace7a0106aad96bd73d54836431"
     },
     "colorspace": {
       "Package": "colorspace",

@@ -17,6 +17,7 @@
 # devtools::install_github ("TobiasLoga/CliDaMon")
 
 # renv::install (packages = "TobiasLoga/AuxFunctions")
+# renv::install (packages = "IWUGERMANY/clidamonger")
 # renv::install (packages = "TobiasLoga/CliDaMon")
 
 # renv::init()
@@ -1554,8 +1555,14 @@ www.iwu.de
                 "Flexibler Plot: ausgewählte Größen",
                 plotOutput (outputId = "Plot_Flex",                   
                             height = "200px"),
-              
-                ) # End conditionalPanel
+                
+                plotOutput (outputId = "Plot_FlexByYear_1",                   
+                            height = "200px"),
+                
+                plotOutput (outputId = "Plot_FlexByYear_2",                   
+                            height = "200px")
+                
+                ), # End conditionalPanel
               
               
               
@@ -1630,7 +1637,9 @@ www.iwu.de
                 "DF_ClimCalc_2",
                 "DF_ClimCalc_Both",
                 "DF_Evaluation_1",
-                "DF_Evaluation_2"
+                "DF_Evaluation_2",
+                "DF_EvaluationByYear_1",
+                "DF_EvaluationByYear_2"
                 # "Data.TA.HD"
               )
             ),
@@ -1748,10 +1757,9 @@ server <- function (input, output, session) {
   
   observe({
     updateSelectInput (session, "Month_End_1",
-                       choices = 
-                         DF_MetaInfo_TA_HD () [1, "Month_Data_Begin" ] : 
-                         DF_MetaInfo_TA_HD () [1, "Month_Data_End"],
-                       selected =  DF_MetaInfo_TA_HD () [1, "Month_Data_End"]
+                       selected = as.numeric (
+                         DF_MetaInfo_TA_HD () [1, "Month_Data_End"]
+                       ) 
     )
     
   })
@@ -1769,6 +1777,7 @@ server <- function (input, output, session) {
     
   })
   
+
   
   ## Adapt the selection list of n_Year_1  
   
@@ -1964,26 +1973,6 @@ server <- function (input, output, session) {
     })
 
 
-  DF_FlexChart <-
-    reactive ({
-      data.frame (
-        "Index" = c (1:24),
-        "Month" = as.character (
-          c (
-            DF_ClimCalc_1 () [c(1:12), "Month"], 
-            DF_ClimCalc_2 () [c(1:12), "Month"])),
-        "Analysis" = c (
-          rep ( paste0 (input$ColName_FlexChart_1, "_Climate1"), 12), 
-          rep ( paste0 (input$ColName_FlexChart_2, "_Climate2"), 12)
-        ),
-        "Value" = c (
-          as.numeric (DF_ClimCalc_1 () [c(1:12), input$ColName_FlexChart_1]) ,
-          as.numeric (DF_ClimCalc_2 () [c(1:12), input$ColName_FlexChart_2])
-        )
-      )
-    })
-  
-  
   
       
     DF_Evaluation_1 <-
@@ -2005,6 +1994,25 @@ server <- function (input, output, session) {
         )
       })
 
+    ## 2024-06-21 Work in progress
+    DF_EvaluationByYear_1 <-
+      reactive ({
+        RemoveStringFromDFColNames (
+          myDataFrame =
+            as.data.frame (myResultList_1 () ["DF_EvaluationByYear"]),
+          myStringToRemove = "DF_EvaluationByYear."
+        )
+      })
+    DF_EvaluationByYear_2 <-
+      reactive ({
+        RemoveStringFromDFColNames (
+          myDataFrame =
+            as.data.frame (myResultList_2 () ["DF_EvaluationByYear"]),
+          myStringToRemove = "DF_EvaluationByYear."
+        )
+      })
+    
+    
     
     DF_AuxDataByMonth_1 <- 
       reactive({
@@ -2053,6 +2061,51 @@ server <- function (input, output, session) {
         )
       })
 
+    
+    DF_FlexChart_12Months <-
+      reactive ({
+        data.frame (
+          "Index" = c (1:24),
+          "Month" = as.character (
+            c (
+              DF_ClimCalc_1 () [c(1:12), "Month"], 
+              DF_ClimCalc_2 () [c(1:12), "Month"])),
+          "Analysis" = c (
+            rep ( paste0 (input$ColName_FlexChart_1, "_Climate1"), 12), 
+            rep ( paste0 (input$ColName_FlexChart_2, "_Climate2"), 12)
+          ),
+          "Value" = c (
+            as.numeric (DF_ClimCalc_1 () [c(1:12), input$ColName_FlexChart_1]) ,
+            as.numeric (DF_ClimCalc_2 () [c(1:12), input$ColName_FlexChart_2])
+          )
+        )
+      })
+    
+    
+    
+    # 2024-06-21 Work in progress
+
+    DF_FlexChart_Sum_Years_1 <-
+      reactive ({
+        data.frame (
+          "Index_EvalYear" = DF_EvaluationByYear_1 () [ ,"Index_EvalYear"],
+          "Label_Year" = DF_EvaluationByYear_1 () [ , "Label_Year"],
+          "Value" = as.numeric (DF_EvaluationByYear_1 () [ , input$ColName_FlexChart_1]) 
+        )
+      })
+
+    DF_FlexChart_Sum_Years_2 <-
+      reactive ({
+        data.frame (
+          "Index_EvalYear" = DF_EvaluationByYear_2 () [ ,"Index_EvalYear"],
+          "Label_Year" = DF_EvaluationByYear_2 () [ , "Label_Year"],
+          "Value" = as.numeric (DF_EvaluationByYear_2 () [ , input$ColName_FlexChart_2]) 
+        )
+      })
+    
+    
+    
+    
   
     ######################################################################################X
     ## Output tables ------
@@ -2417,7 +2470,7 @@ server <- function (input, output, session) {
     
     
     ######################################################################################X
-    ## Plot chart -----
+    ## Plot charts -----
 
     
     y_Lim_Temperature <- reactive ({
@@ -2867,7 +2920,7 @@ server <- function (input, output, session) {
       ggplot2::ggplot () +
         ggplot2::theme_light () +
         ggplot2::geom_col (
-          data = DF_FlexChart () ,
+          data = DF_FlexChart_12Months () ,
           mapping = ggplot2::aes (
             x = Month,
             y = Value,
@@ -2900,7 +2953,90 @@ server <- function (input, output, session) {
       
     })
     
+
+    output$Plot_FlexByYear_1 <- renderPlot ({
+      
+      ggplot2::ggplot () +
+        ggplot2::theme_light () +
+        ggplot2::geom_col (
+          data = DF_FlexChart_Sum_Years_1 () ,
+          fill = 'lightblue',
+          mapping = ggplot2::aes (
+            x = Index_EvalYear,
+            y = Value
+            # fill = Analysis,
+            # group = Analysis
+          ),
+          #position = "dodge",
+          width = 0.5, 
+          na.rm = TRUE,
+          show.legend = TRUE
+        ) + 
+        ggplot2::scale_x_discrete (
+          name = "Jahr",
+          limits = DF_EvaluationByYear_1 () [ , "Index_EvalYear"],
+          labels = DF_EvaluationByYear_1 () [ , "Label_Year"]
+          ) +
+        ggplot2::ylab ("Einheit siehe Variablendefinition") +
+        ggplot2::scale_fill_discrete () +
+        # ggplot2::scale_fill_brewer (palette = "Paired") +
+        ggplot2::theme (legend.title = ggplot2::element_blank ())
+      # ggplot2::theme (legend.position = c (
+      #     0.07 + 0.93 *
+      #       # ggplot2::theme (legend.position = c (
+      #       #   0.07 + 0.93 *
+      #       (( (as.numeric (input$OffsetMonths_FlexChart) - 
+      #             as.numeric (DF_ClimCalc_1 () [1, "Month"])) / 12) %% 1), 
+      #     0.8
+      #   )) +
+      # ggplot2::theme (legend.position = c(0.07, 0.7))
+      #+
+      #ggplot2::theme (legend.position = "bottom")
+      
+    })
     
+    output$Plot_FlexByYear_2 <- renderPlot ({
+      
+      ggplot2::ggplot () +
+        ggplot2::theme_light () +
+        ggplot2::geom_col (
+          data = DF_FlexChart_Sum_Years_2 () ,
+          fill = 'skyblue3',
+          mapping = ggplot2::aes (
+            x = Index_EvalYear,
+            y = Value
+            # fill = Analysis,
+            # group = Analysis
+          ),
+          #position = "dodge",
+          width = 0.5, 
+          na.rm = TRUE,
+          show.legend = TRUE
+        ) + 
+        ggplot2::scale_x_discrete (
+          name = "Jahr",
+          limits = DF_EvaluationByYear_2 () [ , "Index_EvalYear"],
+          labels = DF_EvaluationByYear_2 () [ , "Label_Year"]
+        ) +
+        ggplot2::ylab ("Einheit siehe Variablendefinition") +
+        #ggplot2::scale_fill_brewer (palette = "Paired") +
+        ggplot2::theme (legend.title = ggplot2::element_blank ())
+      # ggplot2::theme (legend.position = c (
+      #     0.07 + 0.93 *
+      #       # ggplot2::theme (legend.position = c (
+      #       #   0.07 + 0.93 *
+      #       (( (as.numeric (input$OffsetMonths_FlexChart) - 
+      #             as.numeric (DF_ClimCalc_1 () [1, "Month"])) / 12) %% 1), 
+      #     0.8
+      #   )) +
+      # ggplot2::theme (legend.position = c(0.07, 0.7))
+      #+
+      #ggplot2::theme (legend.position = "bottom")
+      
+    })
+    
+    
+        
     #######################################################################X
     ## Select and download data table  -----
     
@@ -2921,7 +3057,11 @@ server <- function (input, output, session) {
         "DF_Evaluation_1"  = DF_Evaluation_1 (),
 
         "DF_Evaluation_2"  = DF_Evaluation_2 (),
-
+        
+        "DF_EvaluationByYear_1"  = DF_EvaluationByYear_1 (),
+        
+        "DF_EvaluationByYear_2"  = DF_EvaluationByYear_2 ()
+        
         # "Data.TA.HD"  = clidamonger::data.ta.hd
         # Doesn't work, too large?
         
