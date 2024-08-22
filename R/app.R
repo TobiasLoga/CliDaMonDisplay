@@ -1102,9 +1102,9 @@ www.iwu.de
                       radioButtons (
                         inputId = "Code_Type_DegreeDays",
                         label = "Art der Gradtage",
-                        c ("Heizgradtage (RHDD)" = "RHDD",
-                           "Gradtagzahl (HDD)" = "HDD"),
-                        selected = "RHDD"
+                        c ("Heizgradtage (HDD)" = "HDD",
+                           "Gradtagzahl (RHDD)" = "RHDD"),
+                        selected = "HDD"
                       ),
                       
                       "Gradtagzahl = aufsummierte Differenzen zwischen Innen- und Außentemperatur)",
