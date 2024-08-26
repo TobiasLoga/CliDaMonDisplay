@@ -1102,14 +1102,14 @@ www.iwu.de
                       radioButtons (
                         inputId = "Code_Type_DegreeDays",
                         label = "Art der Gradtage",
-                        c ("Heizgradtage (HDD)" = "HDD",
-                           "Gradtagzahl (RHDD)" = "RHDD"),
-                        selected = "HDD"
+                        c ("Gradtagzahl (RHDD)" = "RHDD",
+                           "Heizgradtage (HDD)" = "HDD"),
+                        selected = "RHDD"
                       ),
                       
-                      "Gradtagzahl = aufsummierte Differenzen zwischen Innen- und Außentemperatur)",
+                      "Gradtagzahl (RHDD) = aufsummierte Differenzen zwischen Innen- und Außentemperatur)",
                       br (),
-                      "Heizgradtage = aufsummierte Differenzen zwischen Heizgrenz- und Außentemperatur)"
+                      "Heizgradtage (HDD) = aufsummierte Differenzen zwischen Heizgrenz- und Außentemperatur)"
                     )
                   ),
                   
@@ -2444,7 +2444,7 @@ server <- function (input, output, session) {
           )
         } else {
           paste0 (
-            "RHDD: ",
+            "HDD: ",
             round (DF_ClimCalc_2 () [13, "HDD"], 0), " / ",  
             round (DF_ClimCalc_1 () [13, "HDD"], 0), " = ",
             round (DF_ClimCalc_2 () [13, "HDD"] / DF_ClimCalc_1 () [13, "HDD"], 2)
