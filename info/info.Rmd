@@ -1,5 +1,5 @@
 ## IWU - Gradtagzahlen Deutschland - Shiny App
-Version: 07.06.2024
+Version: 11.10.2024
 
 ## Erläuterungen 
 
@@ -82,6 +82,23 @@ Quelle für die Solarstrahlungsdaten
 	EUMETSAT  / Satellite Application Facility on Climate Monitoring (CM SAF)					
 	www.cmsaf.eu					
 	Variable:		SIS			
+
+-----
+
+Logbuch der Änderungen						
+						
+  2024-08-26					
+  
+  Korrektur Tab 'Eingaben' / section 'Ergebnisse' / 'Klima 2 im Verhältnis zu Klima 1': Copy-paste-Fehler: Label war falsch für den Fall 'HDD' ('RHDD' statt 'HDD')					
+	
+						
+  2024-10-11					
+  
+  Korrektur: Die Schätzung der Heiztage für Monate mit unvollständigen Temperaturmesswerten der Klimastationen musste korrigiert werden.					
+  
+  Verbesserung: Datentabellen haben jetzt Scrollbalken					    
+						
+-----
 
 
 Institut Wohnen und Umwelt GmbH

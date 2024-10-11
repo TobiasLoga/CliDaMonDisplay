@@ -23,7 +23,7 @@
     },
     "CliDaMon": {
       "Package": "CliDaMon",
-      "Version": "1.1.0",
+      "Version": "1.1.1",
       "Source": "GitHub",
       "Remotes": "TobiasLoga/AuxFunctions",
       "RemoteType": "github",
@@ -31,11 +31,11 @@
       "RemoteRepo": "CliDaMon",
       "RemoteUsername": "TobiasLoga",
       "RemoteRef": "HEAD",
-      "RemoteSha": "126fb8ea55bd80eac408c82655baeccf484295ca",
+      "RemoteSha": "492eca4ab8d83139b159febaeb5c577d19dc8b29",
       "Requirements": [
         "AuxFunctions"
       ],
-      "Hash": "1980ea24cd11e62ffad683ba1d8d1431"
+      "Hash": "8d10dbd57f468c8013cfe3c64f140dc7"
     },
     "DT": {
       "Package": "DT",

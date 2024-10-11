@@ -415,7 +415,7 @@ ui <- shinydashboard::dashboardPage (
 
   
   shinydashboard::dashboardHeader (
-    title = "IWU - Gradtagzahlen"
+    title = "IWU - Gradtage"
   ),
   
   
@@ -476,7 +476,7 @@ ui <- shinydashboard::dashboardPage (
         markdown (
           
 "## IWU - Gradtagzahlen Deutschland - Shiny App
-App-Version: 07.06.2024
+App-Version: 11.10.2024
 
 ## Erläuterungen 
 
@@ -543,6 +543,7 @@ Im Folgenden sind Anhaltswerte für die Heizgrenztemperatur genannt:
 
 Diese Heizgrenztemperaturen gelten für Standardansätze des Klimas und der Nutzung (z.B. Raumtemperatur 20°C). Die tatsächliche Heizgrenztemperatur eines Gebäudes kann jedoch deutlich davon abweichen. Gegenüber den genannten Zahlenwerten erhöhte Werte können sich beispielsweise bei höheren Raumtemperaturen oder bei starker Verschattung der Fenster ergeben. 		
 
+
 Quelle für die Temperaturdaten						
 						
 	DWD - Deutscher Wetterdienst					
@@ -555,10 +556,27 @@ Quelle für die Temperaturdaten
 						
 Quelle für die Solarstrahlungsdaten						
 						
-	DWD - Deutsche Wetterdienst					
+	DWD - Deutscher Wetterdienst					
 	EUMETSAT  / Satellite Application Facility on Climate Monitoring (CM SAF)					
 	www.cmsaf.eu					
 	Variable:		SIS			
+
+-----
+
+Logbuch der Änderungen						
+						
+  2024-08-26					
+  
+  Korrektur Tab 'Eingaben' / section 'Ergebnisse' / 'Klima 2 im Verhältnis zu Klima 1': Copy-paste-Fehler: Label war falsch für den Fall 'HDD' ('RHDD' statt 'HDD')					
+	
+						
+  2024-10-11					
+  
+  Korrektur: Die Schätzung der Heiztage für Monate mit unvollständigen Temperaturmesswerten der Klimastationen musste korrigiert werden.					
+  
+  Verbesserung: Datentabellen haben jetzt Scrollbalken					    
+						
+-----
 
 
 Institut Wohnen und Umwelt GmbH
@@ -1573,37 +1591,83 @@ www.iwu.de
           ), ### END sidebarLayout ----
           
           
+          
           br (),
+          
+          
           strong ("Klima 1 (oben) und Klima 2 (unten) / Mittel über Zeitraum"),
-          tableOutput ("Table_ClimCalc_Both"),
           
-          
+          fluidRow (
+            tableOutput ("Table_ClimCalc_Both"),
+            style = "overflow-x: scroll;"
+          ),
+
           br (),
           
           strong ("Klima 1"),
-          #tableOutput ("Table_HDD_Compact_1"),
-          tableOutput ("Table_ClimCalc_1"),
-          tableOutput ("Table_Evaluation_1"),
-          tableOutput ("Table_StationInfo_1"),
-          tableOutput ("Table_FunctionArguments_1"),
-          #tableOutput ("Table_OutputStructure_1"),
           
+          #tableOutput ("Table_HDD_Compact_1"),
+          
+          fluidRow (
+            tableOutput ("Table_ClimCalc_1"),
+            style = "overflow-x: scroll;"
+          ),
+          
+          fluidRow (
+            tableOutput ("Table_Evaluation_1"),
+            style = "overflow-x: scroll;"
+          ),
+          
+          fluidRow (
+            tableOutput ("Table_StationInfo_1"),
+            style = "overflow-x: scroll;"
+          ),
+          
+          fluidRow (
+            tableOutput ("Table_FunctionArguments_1"),
+            style = "overflow-x: scroll;"
+          ),
+          
+          #tableOutput ("Table_OutputStructure_1"),
           
           br (),
           
           strong ("Klima 2"),
+          
           #tableOutput ("Table_HDD_Compact_2"),
-          tableOutput ("Table_ClimCalc_2"),
-          tableOutput ("Table_Evaluation_2"),
-          tableOutput ("Table_StationInfo_2"),
-          tableOutput ("Table_FunctionArguments_2"),
+          
+          fluidRow (
+            tableOutput ("Table_ClimCalc_2"),
+            style = "overflow-x: scroll;"
+          ),
+          
+          fluidRow (
+            tableOutput ("Table_Evaluation_2"),
+            style = "overflow-x: scroll;"
+          ),
+          
+          fluidRow (
+            tableOutput ("Table_StationInfo_2"),
+            style = "overflow-x: scroll;"
+          ),
+          
+          fluidRow (
+            tableOutput ("Table_FunctionArguments_2"),
+            style = "overflow-x: scroll;"
+          ),
+          
           #tableOutput ("Table_OutputStructure_2"),
           
-          textOutput ("Text_SelectedInput"),
-          #verbatimTextOutput ("Text_SelectedInput")
+          
+          fluidRow(
+            textOutput ("Text_SelectedInput"),
+            #verbatimTextOutput ("Text_SelectedInput")
+            style = "overflow-x: scroll;"
+          )
           
           
-        )
+          
+        ) # End fluidPage
         
         
         
@@ -1630,7 +1694,7 @@ www.iwu.de
             # Choose Output tables ----
             selectInput (
               "myOutputSelection", 
-              "Choose an output table:",
+              "Wähle eine Asugabe-Tabelle:",
               choices = c(
                 "ResultTable_Year",
                 "DF_ClimCalc_1",
@@ -1662,15 +1726,23 @@ www.iwu.de
             #   icon = shiny::icon("download")
             # )
             
+            
           ),
           
           column (
               12,
               
               fluidRow (
-                DT::DTOutput (
-                  "myTable"
+                
+                column (
+                  12,
+                  
+                  DT::DTOutput ("myTable"),
+                  
+                  style = "overflow-x: scroll;"
+                  
                 )
+                
                 
                 # tableOutput (
                 #   "myTable"
