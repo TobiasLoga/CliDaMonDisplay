@@ -15,6 +15,7 @@
 
 # devtools::install_github ("TobiasLoga/AuxFunctions")
 # devtools::install_github ("TobiasLoga/CliDaMon")
+# devtools::install_github ("IWUGERMANY/clidamonger")
 
 # renv::install (packages = "TobiasLoga/AuxFunctions")
 # renv::install (packages = "IWUGERMANY/clidamonger")
