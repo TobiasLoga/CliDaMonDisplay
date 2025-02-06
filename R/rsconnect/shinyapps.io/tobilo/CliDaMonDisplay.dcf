@@ -5,7 +5,7 @@ account: tobilo
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 11183278
-bundleId: 9729375
+bundleId: 9759119
 url: https://tobilo.shinyapps.io/CliDaMonDisplay/
 version: 1
 asMultiple: FALSE

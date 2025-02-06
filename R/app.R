@@ -1695,7 +1695,7 @@ www.iwu.de
             # Choose Output tables ----
             selectInput (
               "myOutputSelection", 
-              "Wähle eine Asugabe-Tabelle:",
+              "Wähle eine Ausgabe-Tabelle:",
               choices = c(
                 "ResultTable_Year",
                 "DF_ClimCalc_1",
