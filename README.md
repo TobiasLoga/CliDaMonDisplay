@@ -42,3 +42,7 @@ This information is also displayed in the section "Info" of the shiny app.
 ---
 
 
+### Views
+ <a href="https://trackgit.com">
+<img src="https://us-central1-trackgit-analytics.cloudfunctions.net/token/ping/m74l9bu39linw5t9ut8m" alt="trackgit-views" />
+</a>
